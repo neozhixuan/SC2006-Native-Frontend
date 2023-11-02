@@ -14,22 +14,30 @@ type InventoryProps = {
 }
 
 const ViewInventoryUI = (props: InventoryProps) => {
-    const [orders, setOrders] = useState({id: 0, name: "Test", quantity: 10})
-//     const fetchOrders = () => {
-//         const apiUrl = 'http://10.91.55.126/api/orderdata/';
-//
-//         axios.get(apiUrl)
+    const [orders, setOrders] = useState([{id: 0, name: "Test", quantity: 10}])
+    const fetchOrders = async() => {
+        const apiUrl = 'http://192.168.0.103/api/orderdata/';
+        try{
+            console.log("trying")
+            const res = await axios.get(apiUrl)
+            setOrders({ data: res.data });
+        }catch(error){
+                console.log(error.message)
+        }
+
 //           .then(response => {
-//             setOrders({ data: response.data });
+//
+//             console.log(response.data)
 //           })
 //           .catch(error => {
 //             console.error('Error fetching data:', error);
 //           });
-//     }
+    }
 
-//     useEffect(()=>{
-//         fetchOrders();
-//     }, [])
+    useEffect(()=>{
+        fetchOrders();
+    }, [])
+
     const mockData = [
      {id: 0, name: "Apple", quantity: 10},
      {id: 1, name: "Orange", quantity: 10},
@@ -66,6 +74,9 @@ const ViewInventoryUI = (props: InventoryProps) => {
                     <Pressable style={[styles.mainButton]} onPress={() => props.setPage(3)}>
                         <Text style={[styles.buttonText, styles.normalText]}>View Daily Suggestions</Text>
                     </Pressable>
+                    {/*<Pressable style={[styles.mainButton]} onPress={fetchOrders}>
+                        <Text style={[styles.buttonText, styles.normalText]}>View Daily Suggestions</Text>
+                    </Pressable>*/}
                 </View>
             </View>
         </View>
