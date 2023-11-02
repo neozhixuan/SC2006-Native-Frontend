@@ -38,7 +38,8 @@ function App(): JSX.Element {
 
 const styles = StyleSheet.create({
     backgroundStyle:{
-        backgroundColor: '#C6847C'
+        backgroundColor: '#C6847C',
+        height: '100%'
     },
 });
 

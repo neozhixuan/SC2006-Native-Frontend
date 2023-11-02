@@ -6,17 +6,34 @@ import {
   Pressable,
   Alert
 } from 'react-native';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 
 type InventoryProps = {
     setPage: ()=>void;
 }
 
 const ViewInventoryUI = (props: InventoryProps) => {
+    const [orders, setOrders] = useState({id: 0, name: "Test", quantity: 10})
+//     const fetchOrders = () => {
+//         const apiUrl = 'http://10.91.55.126/api/orderdata/';
+//
+//         axios.get(apiUrl)
+//           .then(response => {
+//             setOrders({ data: response.data });
+//           })
+//           .catch(error => {
+//             console.error('Error fetching data:', error);
+//           });
+//     }
 
+//     useEffect(()=>{
+//         fetchOrders();
+//     }, [])
     const mockData = [
-     {name: "Apple", quantity: 10},
-     {name: "Orange", quantity: 10},
-     {name: "Guava", quantity: 15},
+     {id: 0, name: "Apple", quantity: 10},
+     {id: 1, name: "Orange", quantity: 10},
+     {id: 2, name: "Guava", quantity: 15},
     ]
     // Render each item in the list
     const renderItem = ({ item }) => (
@@ -30,6 +47,7 @@ const ViewInventoryUI = (props: InventoryProps) => {
         <View style={styles.mainBody}>
             <View style={styles.container}>
                 <Text style={[styles.lightText, styles.headerText]}>Inventory</Text>
+                <Text style={[styles.lightText, styles.normalText]}>{orders.name}</Text>
                 <View style={styles.listStyle}>
                     <FlatList
                       data={mockData}
@@ -101,7 +119,7 @@ const styles = StyleSheet.create({
        textAlign: 'center'
    },
    buttonSection:{
-       marginTop: '100%',
+       marginTop: '70%',
        flexDirection: 'column',
        gap: 3
    },
