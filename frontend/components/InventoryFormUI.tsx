@@ -5,14 +5,38 @@ import {
   FlatList,
   Pressable,
   Alert,
-  TextInput
+  TextInput,
 } from 'react-native';
+import { useEffect, useState } from 'react';
+import {Picker} from '@react-native-picker/picker';
 
 type InventoryProps = {
     setPage: ()=>void;
 }
 
 const InventoryFormUI = (props: InventoryProps) => {
+    const [itemNames, setItemNames] = useState([{label: "Test", value:"Test"}]);
+    const [selectedValue, setSelectedValue] = useState("")
+
+    const fetchItemNames = async () => {
+      try {
+        const response = await fetch('http://10.0.2.2:8000/fn/getItemNames');
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const json = await response.json();
+        setItemNames(json);
+        console.log(json);
+        return json;
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    useEffect(()=>{
+        fetchItemNames();
+    }, [])
+
     return(
         <View style={styles.mainBody}>
             <View style={styles.container}>
@@ -21,17 +45,22 @@ const InventoryFormUI = (props: InventoryProps) => {
                 <Text style={[styles.lightText, styles.normalText]}>Enter shipment details*:</Text>
                 <View style={styles.listStyle, styles.marginSmaller}>
                     <View style={styles.inputItem}>
-                        <TextInput
-                            style={styles.inputName}
-//                             onChangeText={onChangeNumber}
-//                             value={number}
-                            placeholder="Item"
-                            keyboardType="numeric"
-                        />
+                      <Picker
+                        style={styles.inputName}
+                        selectedValue={selectedValue}
+                        onValueChange={(itemValue, itemIndex) => {
+                          setSelectedValue(itemValue);
+                        }}
+                      >
+                        <Picker.Item label="Select an option..." value={null} />
+                        {itemNames.map((item, index) => (
+                          <Picker.Item label={item.label} value={item.value} key={index} />
+                        ))}
+                      </Picker>
                        <TextInput
                             style={styles.inputQty}
-//                             onChangeText={onChangeNumber}
-//                             value={number}
+    //                             onChangeText={onChangeNumber}
+    //                             value={number}
                             placeholder="Qty"
                             keyboardType="numeric"
                         />
@@ -52,8 +81,8 @@ const InventoryFormUI = (props: InventoryProps) => {
                     </View>
                 </View>
                 {/*Expiry Date and Time*/}
-                <Text style={[styles.lightText, styles.normalText, styles.marginLarger]}>Enter current date and time:</Text>
-                <View style={styles.listStyle, styles.marginSmaller}>
+                <Text style={[styles.lightText, styles.normalText, styles.marginLarger]}>Enter expiry date and time:</Text>
+                <View style={styles.marginSmaller}>
                     <View style={styles.inputItem}>
                         <TextInput
                             style={styles.normalInput}
@@ -65,7 +94,7 @@ const InventoryFormUI = (props: InventoryProps) => {
 
                     </View>
                 </View>
-                {/*Expiry Date and Time*/}
+                {/*Password*/}
                 <Text style={[styles.lightText, styles.normalText, styles.marginLarger]}>Enter password:</Text>
                 <View style={styles.listStyle, styles.marginSmaller}>
                     <View style={styles.inputItem}>
@@ -79,6 +108,7 @@ const InventoryFormUI = (props: InventoryProps) => {
 
                     </View>
                 </View>
+                {/* Rows of buttons */}
                 <View style={styles.marginLarger}>
                    <Pressable style={styles.mainButton} onPress={() => Alert.alert('Submitted')}>
                         <Text style={[styles.buttonText, styles.normalText]}>Submit</Text>
@@ -151,13 +181,13 @@ const styles = StyleSheet.create({
        gap: 3
    },
    inputName: {
-       height: 40,
+       height: 20,
        width: "80%",
        backgroundColor: COLORS.light,
-       borderWidth: 2,        // Border width
-       borderColor: 'black',  // Border color
-       borderRadius: 8,       // Border radius (for rounded corners)
-       padding: 10,
+//        borderWidth: 2,        // Border width
+//        borderColor: 'black',  // Border color
+//        borderRadius: 8,       // Border radius (for rounded corners)
+//        padding: 10,
    },
     inputQty: {
         height: 40,

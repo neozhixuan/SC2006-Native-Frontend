@@ -15,39 +15,29 @@ type InventoryProps = {
 
 const ViewInventoryUI = (props: InventoryProps) => {
     const [orders, setOrders] = useState([{id: 0, name: "Test", quantity: 10}])
-    const fetchOrders = async() => {
-        const apiUrl = 'http://192.168.0.103/api/orderdata/';
-        try{
-            console.log("trying")
-            const res = await axios.get(apiUrl)
-            setOrders({ data: res.data });
-        }catch(error){
-                console.log(error.message)
-        }
-
-//           .then(response => {
-//
-//             console.log(response.data)
-//           })
-//           .catch(error => {
-//             console.error('Error fetching data:', error);
-//           });
-    }
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch(
+          'http://10.0.2.2:8000/api/orderdata/',
+        );
+        const json = await response.json();
+        setOrders(json);
+        console.log(json);
+        return json;
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
     useEffect(()=>{
         fetchOrders();
     }, [])
 
-    const mockData = [
-     {id: 0, name: "Apple", quantity: 10},
-     {id: 1, name: "Orange", quantity: 10},
-     {id: 2, name: "Guava", quantity: 15},
-    ]
     // Render each item in the list
     const renderItem = ({ item }) => (
       <View style={styles.listItem}>
-        <Text style={styles.normalText}>{item.name}</Text>
-        <Text style={styles.normalText}>{item.quantity}</Text>
+        <Text style={styles.normalText}>{item.ItemName}</Text>
+        <Text style={styles.normalText}>{item.Quantity}</Text>
       </View>
     );
 
@@ -58,12 +48,11 @@ const ViewInventoryUI = (props: InventoryProps) => {
                 <Text style={[styles.lightText, styles.normalText]}>{orders.name}</Text>
                 <View style={styles.listStyle}>
                     <FlatList
-                      data={mockData}
+                      data={orders}
                       renderItem={renderItem}
                       keyExtractor={(item) => item.id}
                     />
                 </View>
-
                 <View style={styles.buttonSection}>
                     <Pressable style={styles.mainButton} onPress={() => props.setPage(1)}>
                         <Text style={[styles.buttonText, styles.normalText]}>Fill in Inventory Form</Text>
@@ -74,8 +63,8 @@ const ViewInventoryUI = (props: InventoryProps) => {
                     <Pressable style={[styles.mainButton]} onPress={() => props.setPage(3)}>
                         <Text style={[styles.buttonText, styles.normalText]}>View Daily Suggestions</Text>
                     </Pressable>
-                    {/*<Pressable style={[styles.mainButton]} onPress={fetchOrders}>
-                        <Text style={[styles.buttonText, styles.normalText]}>View Daily Suggestions</Text>
+                    {/*<Pressable style={[styles.mainButton]} onPress={fetchItemNames}>
+                        <Text style={[styles.buttonText, styles.normalText]}>Fetch</Text>
                     </Pressable>*/}
                 </View>
             </View>
