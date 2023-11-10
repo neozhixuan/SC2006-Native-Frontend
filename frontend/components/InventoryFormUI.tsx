@@ -4,11 +4,14 @@ import {
   View,
   FlatList,
   Pressable,
+  Button,
+  Platform,
   Alert,
   TextInput,
 } from 'react-native';
 import { useEffect, useState } from 'react';
 import {Picker} from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 type InventoryProps = {
     setPage: ()=>void;
@@ -17,6 +20,29 @@ type InventoryProps = {
 const InventoryFormUI = (props: InventoryProps) => {
     const [itemNames, setItemNames] = useState([{label: "Test", value:"Test"}]);
     const [selectedValue, setSelectedValue] = useState("")
+
+    const [date, setDate] = useState(new Date());
+    const [mode, setMode] = useState('date');
+    const [show, setShow] = useState(false);
+    const [text, setText] = useState('Empty');
+
+    const onChangeDate = (event, selectedDate) => {
+        const currentDate = selectedDate || date;
+        setShow(Platform.OS === 'android');
+        setDate(currentDate);
+
+        let tempDate = new Date(currentDate);
+        let fDate = tempDate.getDate() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
+        let fTime = 'Hours: ' + tempDate.getHours() + ' | Minutes: ' + tempDate.getMinutes();
+        setText(fDate + '\n' + fTime);
+
+        console.log(fDate + '(' + fTime + ')');
+    }
+
+    const showMode = (currentMode) => {
+        setShow(true);
+        setMode(currentMode);
+    }
 
     const fetchItemNames = async () => {
       try {
@@ -45,8 +71,9 @@ const InventoryFormUI = (props: InventoryProps) => {
                 <Text style={[styles.lightText, styles.normalText]}>Enter shipment details*:</Text>
                 <View style={styles.listStyle, styles.marginSmaller}>
                     <View style={styles.inputItem}>
+                      <View style={styles.pickerStyle}>
                       <Picker
-                        style={styles.inputName}
+                        style={styles.picker}
                         selectedValue={selectedValue}
                         onValueChange={(itemValue, itemIndex) => {
                           setSelectedValue(itemValue);
@@ -57,6 +84,7 @@ const InventoryFormUI = (props: InventoryProps) => {
                           <Picker.Item label={item.label} value={item.value} key={index} />
                         ))}
                       </Picker>
+                      </View>
                        <TextInput
                             style={styles.inputQty}
     //                             onChangeText={onChangeNumber}
@@ -67,17 +95,32 @@ const InventoryFormUI = (props: InventoryProps) => {
                     </View>
                 </View>
                 {/*Current Date and Time*/}
-                <Text style={[styles.lightText, styles.normalText, styles.marginLarger]}>Enter current date and time:</Text>
+                <Text style={[styles.lightText, styles.normalText, styles.marginSpecial]}>Enter current date and time:</Text>
                 <View style={styles.listStyle, styles.marginSmaller}>
                     <View style={styles.inputItem}>
-                        <TextInput
-                            style={styles.normalInput}
-//                             onChangeText={onChangeNumber}
-//                             value={number}
-                            placeholder="Item"
-                            keyboardType="numeric"
+                        <Text style={{fontWeight: 'bold', fontSize: 20}}>{text}</Text>
+                        <View style = {styles.buttonStyle}>
+                        <Button
+                            title= 'Date'
+                            onPress= {() => showMode('date')}
                         />
+                        </View>
+                        <View style = {styles.buttonStyle}>
+                        <Button
+                            title= 'Time'
+                            onPress= {() => showMode('time')}
+                        />
+                        </View>
 
+                        {show && (
+                            <DateTimePicker
+                            testID='dateTimePicker'
+                            value= {date}
+                            mode= {mode}
+                            is24Hour= {true}
+                            display= 'default'
+                            onChange= {onChangeDate}
+                        />)}
                     </View>
                 </View>
                 {/*Expiry Date and Time*/}
@@ -184,20 +227,21 @@ const styles = StyleSheet.create({
        height: 20,
        width: "80%",
        backgroundColor: COLORS.light,
-//        borderWidth: 2,        // Border width
-//        borderColor: 'black',  // Border color
-//        borderRadius: 8,       // Border radius (for rounded corners)
-//        padding: 10,
+       borderWidth: 2,        // Border width
+       borderColor: 'black',  // Border color
+       borderRadius: 8,       // Border radius (for rounded corners)
+       padding: 10,
    },
-    inputQty: {
-        height: 40,
-        margin: 12,
+   inputQty: {
+       marginTop: 40,
+       height: 40,
+       margin: 12,
        backgroundColor: COLORS.light,
        borderWidth: 2,        // Border width
        borderColor: 'black',  // Border color
        borderRadius: 8,       // Border radius (for rounded corners)
-        padding: 10,
-    },
+       padding: 10,
+   },
    normalInput: {
        height: 40,
        width: "100%",
@@ -208,11 +252,32 @@ const styles = StyleSheet.create({
        padding: 10,
    },
    marginSmaller:{
-        marginTop: 20,
+       marginTop: 20,
    },
-      marginLarger:{
-           marginTop: 40,
-      }
+   marginLarger:{
+       marginTop: 40,
+   },
+   marginSpecial: {
+       marginTop: 70,
+   },
+   picker:{
+       height: 40,
+   },
+   pickerStyle:{
+       width: "80%",
+       marginTop: 40,
+       backgroundColor: COLORS.light,
+       borderWidth: 2,        // Border width
+       borderColor: 'black',  // Border color
+       borderRadius: 8,       // Border radius (for rounded corners)
+       padding: 10,
+   },
+   buttonStyle: {
+       marginTop: 40,
+       marginLeft: 20,
+       height: 60,
+       width: "30%",
+   }
 });
 
 export default InventoryFormUI;
