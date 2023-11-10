@@ -87,7 +87,7 @@ const InventoryFormUI = (props: InventoryProps) => {
                       </Picker>
                       </View>
                        <TextInput
-                            style={styles.inputQty}
+                            style={{...styles.inputQty, height:60, marginTop: 40, width: 50}}
     //                             onChangeText={onChangeNumber}
     //                             value={number}
                             placeholder="Qty"

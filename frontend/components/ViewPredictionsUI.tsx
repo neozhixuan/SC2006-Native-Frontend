@@ -17,7 +17,7 @@ import {
 } from "react-native-chart-kit";
 ///////////////////
 
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 
 type InventoryProps = {
     setPage: ()=>void;
@@ -25,6 +25,26 @@ type InventoryProps = {
 
 const ViewPredictionsUI = (props: InventoryProps) => {
     const [histoData, setHistoData] = useState([1,2,3,4,5]);
+    const [predictions, setPredictions] = useState([]);
+
+    const fetchPredictions = async () => {
+      try {
+        const response = await fetch(
+          'http://10.0.2.2:8000/api/predictions',
+        );
+        const json = await response.json();
+        setPredictions(json);
+        console.log(json);
+        return json;
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    useEffect(()=>{
+        fetchPredictions();
+    }, [])
+
     const mockData = [
      {id: 0, name: "Apple", quantity: 10},
      {id: 1, name: "Orange", quantity: 10},

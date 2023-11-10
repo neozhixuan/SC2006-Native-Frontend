@@ -21,7 +21,7 @@ export const styles = StyleSheet.create({
    },
    headerText:{
        fontSize: 30,
-       fontWeight: 900
+       fontWeight: "900"
    },
    normalText:{
        fontSize: 20,
@@ -30,13 +30,14 @@ export const styles = StyleSheet.create({
    // List styles
    listStyle:{
        flexDirection: 'column',
-       width: '100%'
+       width: '100%',
+       gap: 5
    },
    listItem:{
        flex: 1,
        flexDirection: 'row',
        width: '100%',
-       justifyContent: 'space-between'
+       justifyContent: 'space-between',
    },
    // Input Styles
   inputItem:{
@@ -46,13 +47,22 @@ export const styles = StyleSheet.create({
       width: '100%',
   },
    inputName: {
-       height: 20,
+       height: 40,
        width: "80%",
        backgroundColor: COLORS.light,
        borderWidth: 2,        // Border width
        borderColor: 'black',  // Border color
        borderRadius: 8,       // Border radius (for rounded corners)
-       padding: 10,
+       padding: 5,
+   },
+   inputQty: {
+     height: 40,
+     width: "15%",
+     backgroundColor: COLORS.light,
+     borderWidth: 2,        // Border width
+     borderColor: 'black',  // Border color
+     borderRadius: 8,       // Border radius (for rounded corners)
+     padding: 10,
    },
    normalInput: {
        height: 40,
@@ -109,22 +119,12 @@ export const styles = StyleSheet.create({
        borderRadius: 8,       // Border radius (for rounded corners)
        padding: 0,
    },
-    inputQty: {
-      marginTop: 40,
-      height: 40,
-      margin: 12,
-      backgroundColor: COLORS.light,
-      borderWidth: 2,        // Border width
-      borderColor: 'black',  // Border color
-      borderRadius: 8,       // Border radius (for rounded corners)
-      padding: 10,
-    },
     suggestionItem: {
         marginTop: 10,
         backgroundColor: COLORS.light,
-        borderColor: "#000000",
-        borderRadius: 7,
-        borderWidth: 1,
+        borderColor: 'black',  // Border color
+        borderRadius: 8,
+        borderWidth: 2,
         padding: 10
     }
 });

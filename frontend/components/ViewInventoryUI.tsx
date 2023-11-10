@@ -37,8 +37,8 @@ const ViewInventoryUI = (props: InventoryProps) => {
     // Render each item in the list
     const renderItem = ({ item }) => (
       <View style={styles.listItem}>
-        <Text style={styles.normalText}>{item.ItemName}</Text>
-        <Text style={styles.normalText}>{item.Quantity}</Text>
+        <View style={styles.inputName}><Text style={styles.normalText}>{item.ItemName}</Text></View>
+        <View style={styles.inputQty}><Text style={{textAlign: "center", fontWeight: "600"}}>{item.Quantity}</Text></View>
       </View>
     );
 
