@@ -36,7 +36,7 @@ const ViewInventoryUI = (props: InventoryProps) => {
 
     // Render each item in the list
     const renderItem = ({ item }) => (
-      <View style={styles.listItem}>
+      <View style={{...styles.listItem, marginTop: 5}}>
         <View style={styles.inputName}><Text style={styles.normalText}>{item.ItemName}</Text></View>
         <View style={styles.inputQty}><Text style={{textAlign: "center", fontWeight: "600"}}>{item.Quantity}</Text></View>
       </View>
@@ -46,7 +46,6 @@ const ViewInventoryUI = (props: InventoryProps) => {
         <View style={styles.mainBody}>
             <View style={styles.container}>
                 <Text style={[styles.lightText, styles.headerText]}>Inventory</Text>
-                <Text style={[styles.lightText, styles.normalText]}>{orders.name}</Text>
                 <View style={styles.listStyle}>
                     <FlatList
                       data={orders}
@@ -64,9 +63,6 @@ const ViewInventoryUI = (props: InventoryProps) => {
                     <Pressable style={[styles.mainButton]} onPress={() => props.setPage(3)}>
                         <Text style={[styles.buttonText, styles.normalText]}>View Daily Suggestions</Text>
                     </Pressable>
-                    {/*<Pressable style={[styles.mainButton]} onPress={fetchItemNames}>
-                        <Text style={[styles.buttonText, styles.normalText]}>Fetch</Text>
-                    </Pressable>*/}
                 </View>
             </View>
         </View>

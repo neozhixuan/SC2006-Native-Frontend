@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
    listStyle:{
        flexDirection: 'column',
        width: '100%',
-       gap: 5
+       gap: 3
    },
    listItem:{
        flex: 1,
