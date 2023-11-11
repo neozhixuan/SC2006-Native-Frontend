@@ -9,7 +9,7 @@ import {
   Alert,
   TextInput,
 } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {Picker} from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { styles, COLORS } from "./styles";
@@ -18,14 +18,22 @@ type InventoryProps = {
     setPage: ()=>void;
 }
 
-const InventoryFormUI = (props: InventoryProps) => {
-    const [itemNames, setItemNames] = useState([{label: "Test", value:"Test"}]);
-    const [selectedValue, setSelectedValue] = useState("")
+const emptyItem = {
+	"name": "",
+	"qty": null,
+};
 
+const InventoryFormUI = (props: InventoryProps) => {
+    // Dropdown Values
+    const [itemNames, setItemNames] = useState([{label: "Test", value:"Test"}]);
+    // List of Items inputted in form
+    const [items, setItems] = useState([{"name": "", "qty": null}])
+    // Date Time Picker formatting
     const [expiryDate, setExpiryDate] = useState("")
     const [date, setDate] = useState(new Date());
     const [showPicker, setShowPicker] = useState(false);
 
+    // Date Time Picker logic
     const toggleDatePicker = () => {
         setShowPicker(!showPicker);
     };
@@ -44,6 +52,31 @@ const InventoryFormUI = (props: InventoryProps) => {
             toggleDatePicker();
         }
     };
+
+    // Item List Handler
+	const handleAddItem = useCallback(() => {
+		const a = [...items, emptyItem];
+		setItems(a);
+	}, [items, setItems]);
+
+    const handleUpdateItem = useCallback(
+        (type, index, value) => {
+            const _items = [...items];
+            const _item = { ..._items[index] };
+            _item[type] = value;
+            _items[index] = _item;
+            setItems(_items);
+        },
+        [items, setItems],
+    );
+
+	const handleRemoveItem = useCallback((index) => {
+        const _items = [...items];
+        _items.splice(index, 1);
+        setItems(_items);
+    }, [items, setItems]);
+
+    // Fetching list of names for dropdown, from backend
     const fetchItemNames = async () => {
       try {
         const response = await fetch('http://10.0.2.2:8000/fn/getItemNames');
@@ -59,9 +92,15 @@ const InventoryFormUI = (props: InventoryProps) => {
       }
     };
 
+    // Render on component mount
     useEffect(()=>{
         fetchItemNames();
     }, [])
+
+    // Submit Handler
+    const onSubmitHandler = () => {
+        console.log(items)
+    }
 
     return(
         <View style={styles.mainBody}>
@@ -69,30 +108,38 @@ const InventoryFormUI = (props: InventoryProps) => {
                 <Text style={[styles.lightText, styles.headerText]}>Inventory Form (New Shipment)</Text>
                 {/*Shipping Details*/}
                 <Text style={[styles.lightText, styles.normalText]}>Enter shipment details*:</Text>
-                <View style={styles.listStyle, styles.marginSmaller}>
-                    <View style={styles.inputItem}>
-                      <View style={styles.pickerStyle}>
-                      <Picker
-                        style={styles.picker}
-                        selectedValue={selectedValue}
-                        onValueChange={(itemValue, itemIndex) => {
-                          setSelectedValue(itemValue);
-                        }}
-                      >
-                        <Picker.Item label="Select an option..." value={null} />
-                        {itemNames.map((item, index) => (
-                          <Picker.Item label={item.label} value={item.value} key={index} />
-                        ))}
-                      </Picker>
-                      </View>
-                       <TextInput
-                            style={{...styles.inputQty, height:60, marginTop: 40, width: 50}}
-    //                             onChangeText={onChangeNumber}
-    //                             value={number}
-                            placeholder="Qty"
-                            keyboardType="numeric"
+                <View style={{...styles.listStyle, ...styles.marginSmaller, gap: 65}}>
+                    {items.map((item, idx) => (
+                      <View style={styles.inputItem} key={idx}>
+                        <View style={styles.pickerStyle}>
+                          <Picker
+                              style={styles.picker}
+                              selectedValue={item.name}
+                              onValueChange={(itemValue, itemIndex) => {
+                                handleUpdateItem("name", idx, itemValue)
+                              }}
+                          >
+                            <Picker.Item label="Select an option..." value={null} />
+                            {itemNames.map((item, index) => (
+                                <Picker.Item label={item.label} value={item.value} key={index} />
+                            ))}
+                          </Picker>
+                        </View>
+                        <TextInput
+                          style={{...styles.inputQty, height:60, marginTop: 40, width: 50}}
+                          placeholder="Qty"
+                          keyboardType="numeric"
+                          onChangeText={(text) => handleUpdateItem("qty", idx, text)}
                         />
-                    </View>
+                        {idx === 0 ? (
+                        <Pressable style={{...styles.inputQty, height:60, marginTop: 40, width: 50}} onPress={handleAddItem}>
+                          <Text>+</Text>
+                        </Pressable>) : (
+                        <Pressable style={{...styles.inputQty, height:60, marginTop: 40, width: 50}} onPress={() => handleRemoveItem(idx)}>
+                          <Text>-</Text>
+                        </Pressable>)}
+                      </View>
+                    ))}
                 </View>
                 {/*Expiry Date and Time*/}
                 <Text style={[styles.lightText, styles.normalText, styles.marginSpecial]}>Enter expiry date and time:</Text>
@@ -138,7 +185,7 @@ const InventoryFormUI = (props: InventoryProps) => {
                 </View>
                 {/* Rows of buttons */}
                 <View style={styles.marginLarger}>
-                   <Pressable style={styles.mainButton} onPress={() => Alert.alert('Submitted')}>
+                   <Pressable style={styles.mainButton} onPress={onSubmitHandler}>
                         <Text style={[styles.buttonText, styles.normalText]}>Submit</Text>
                     </Pressable>
                    <Pressable style={[styles.mainButton, styles.marginSmaller]} onPress={() => props.setPage(0)}>

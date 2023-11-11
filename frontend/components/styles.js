@@ -111,7 +111,7 @@ export const styles = StyleSheet.create({
        height: 40,
    },
    pickerStyle:{
-       width: "80%",
+       width: "70%",
        marginTop: 40,
        backgroundColor: COLORS.light,
        borderWidth: 2,        // Border width
