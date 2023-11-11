@@ -20,8 +20,6 @@ Install all necessary SDKs from https://reactnative.dev/docs/environment-setup
 3. Open `gradle.properties` and add your old JDK version path `org.gradle.java.home=C:\\Program Files\\Java\\jdk-17.0.1`
 4. `./gradlew clean`
 5. `cd ..`
-6. For Windows: `set JAVA_HOME=C:\Program Files\Java\jdk-17.0.1`
-7. For Windows: `set PATH=C:\Program Files\Java\jdk-17.0.1\bin`
 
 ## Run the android app
 1. Start the Google Pixel Emulator
