@@ -21,29 +21,28 @@ const InventoryFormUI = (props: InventoryProps) => {
     const [itemNames, setItemNames] = useState([{label: "Test", value:"Test"}]);
     const [selectedValue, setSelectedValue] = useState("")
 
+    const [expiryDate, setExpiryDate] = useState("")
     const [date, setDate] = useState(new Date());
-    const [mode, setMode] = useState('date');
-    const [show, setShow] = useState(false);
-    const [text, setText] = useState('Empty');
+    const [showPicker, setShowPicker] = useState(false);
 
-    const onChangeDate = (event, selectedDate) => {
-        const currentDate = selectedDate || date;
-        setShow(Platform.OS === 'android');
-        setDate(currentDate);
+    const toggleDatePicker = () => {
+        setShowPicker(!showPicker);
+    };
 
-        let tempDate = new Date(currentDate);
-        let fDate = tempDate.getDate() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
-        let fTime = 'Hours: ' + tempDate.getHours() + ' | Minutes: ' + tempDate.getMinutes();
-        setText(fDate + '\n' + fTime);
+    const onChangePicker = ({ type }, selectedDate) => {
+        if (type == "set") {
+            const currentDate = selectedDate;
+            setDate(currentDate);
 
-        console.log(fDate + '(' + fTime + ')');
-    }
-
-    const showMode = (currentMode) => {
-        setShow(true);
-        setMode(currentMode);
-    }
-
+            if (Platform.OS === 'android') {
+                toggleDatePicker();
+                setExpiryDate(currentDate.toDateString());
+            }
+        }
+        else {
+            toggleDatePicker();
+        }
+    };
     const fetchItemNames = async () => {
       try {
         const response = await fetch('http://10.0.2.2:8000/fn/getItemNames');
@@ -94,47 +93,33 @@ const InventoryFormUI = (props: InventoryProps) => {
                         />
                     </View>
                 </View>
-                {/*Current Date and Time*/}
-                <Text style={[styles.lightText, styles.normalText, styles.marginSpecial]}>Enter current date and time:</Text>
-                <View style={styles.listStyle, styles.marginSmaller}>
-                    <View style={styles.inputItem}>
-                        <Text style={{fontWeight: 'bold', fontSize: 20}}>{text}</Text>
-                        <View style = {styles.buttonStyle}>
-                        <Button
-                            title= 'Date'
-                            onPress= {() => showMode('date')}
-                        />
-                        </View>
-                        <View style = {styles.buttonStyle}>
-                        <Button
-                            title= 'Time'
-                            onPress= {() => showMode('time')}
-                        />
-                        </View>
-
-                        {show && (
-                            <DateTimePicker
-                            testID='dateTimePicker'
-                            value= {date}
-                            mode= {mode}
-                            is24Hour= {true}
-                            display= 'default'
-                            onChange= {onChangeDate}
-                        />)}
-                    </View>
-                </View>
                 {/*Expiry Date and Time*/}
-                <Text style={[styles.lightText, styles.normalText, styles.marginLarger]}>Enter expiry date and time:</Text>
+                <Text style={[styles.lightText, styles.normalText, styles.marginSpecial]}>Enter expiry date and time:</Text>
                 <View style={styles.marginSmaller}>
                     <View style={styles.inputItem}>
-                        <TextInput
-                            style={styles.normalInput}
-//                             onChangeText={onChangeNumber}
-//                             value={number}
-                            placeholder="Item"
-                            keyboardType="numeric"
-                        />
+                        {showPicker && (
+                            <DateTimePicker
+                                mode= "date"
+                                display= "spinner"
+                                value= {date}
+                                onChange= {onChangePicker}
 
+                            />
+                        )}
+                        {!showPicker && (
+                            <Pressable
+                                onPress= {toggleDatePicker}
+                            >
+                                <TextInput
+                                    style={styles.normalInput}
+                                    placeholder="Sat Nov 11 2023"
+                                    value= {expiryDate}
+                                    onChangeText= {setExpiryDate}
+                                    placeholderTextColor="#11182744"
+                                    editable= {false}
+                                />
+                            </Pressable>
+                        )}
                     </View>
                 </View>
                 {/*Password*/}
@@ -143,10 +128,9 @@ const InventoryFormUI = (props: InventoryProps) => {
                     <View style={styles.inputItem}>
                         <TextInput
                             style={styles.normalInput}
-//                             onChangeText={onChangeNumber}
-//                             value={number}
                             placeholder="Item"
                             keyboardType="numeric"
+                            placeholderTextColor="#11182744"
                         />
 
                     </View>
@@ -233,7 +217,7 @@ const styles = StyleSheet.create({
        padding: 10,
    },
    inputQty: {
-       marginTop: 40,
+       marginTop: 30,
        height: 40,
        margin: 12,
        backgroundColor: COLORS.light,
@@ -243,6 +227,7 @@ const styles = StyleSheet.create({
        padding: 10,
    },
    normalInput: {
+       color: 'black',
        height: 40,
        width: "100%",
        backgroundColor: COLORS.light,
@@ -258,19 +243,18 @@ const styles = StyleSheet.create({
        marginTop: 40,
    },
    marginSpecial: {
-       marginTop: 70,
+       marginTop: 50,
    },
    picker:{
        height: 40,
    },
    pickerStyle:{
        width: "80%",
-       marginTop: 40,
+       marginTop: 20,
        backgroundColor: COLORS.light,
        borderWidth: 2,        // Border width
        borderColor: 'black',  // Border color
        borderRadius: 8,       // Border radius (for rounded corners)
-       padding: 10,
    },
    buttonStyle: {
        marginTop: 40,
