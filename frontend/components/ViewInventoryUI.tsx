@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { styles, COLORS } from "./styles";
 
 type InventoryProps = {
     setPage: ()=>void;
@@ -35,9 +36,9 @@ const ViewInventoryUI = (props: InventoryProps) => {
 
     // Render each item in the list
     const renderItem = ({ item }) => (
-      <View style={styles.listItem}>
-        <Text style={styles.normalText}>{item.ItemName}</Text>
-        <Text style={styles.normalText}>{item.Quantity}</Text>
+      <View style={{...styles.listItem, marginTop: 5}}>
+        <View style={styles.inputName}><Text style={styles.normalText}>{item.ItemName}</Text></View>
+        <View style={styles.inputQty}><Text style={{textAlign: "center", fontWeight: "600"}}>{item.Quantity}</Text></View>
       </View>
     );
 
@@ -45,7 +46,6 @@ const ViewInventoryUI = (props: InventoryProps) => {
         <View style={styles.mainBody}>
             <View style={styles.container}>
                 <Text style={[styles.lightText, styles.headerText]}>Inventory</Text>
-                <Text style={[styles.lightText, styles.normalText]}>{orders.name}</Text>
                 <View style={styles.listStyle}>
                     <FlatList
                       data={orders}
@@ -63,72 +63,9 @@ const ViewInventoryUI = (props: InventoryProps) => {
                     <Pressable style={[styles.mainButton]} onPress={() => props.setPage(3)}>
                         <Text style={[styles.buttonText, styles.normalText]}>View Daily Suggestions</Text>
                     </Pressable>
-                    {/*<Pressable style={[styles.mainButton]} onPress={fetchItemNames}>
-                        <Text style={[styles.buttonText, styles.normalText]}>Fetch</Text>
-                    </Pressable>*/}
                 </View>
             </View>
         </View>
     )
 }
-const COLORS = {
-light: '#FBF5E6',
-peach: '#C6847C',
-buttonColor: '#EBCABC'
-}
-
-const styles = StyleSheet.create({
-   mainBody: {
-       height: '100%',
-       flexDirection: 'column',
-       padding: 30,
-   },
-   container: {
-       flex: 1,
-   },
-   lightText:{
-       color: COLORS.light
-   },
-   headerText:{
-       fontSize: 30,
-       fontWeight: 900
-   },
-   normalText:{
-       fontSize: 20,
-       fontWeight: 'bold'
-   },
-   listStyle:{
-       flexDirection: 'column',
-       width: '100%'
-   },
-   listItem:{
-       flex: 1,
-       flexDirection: 'row',
-       width: '100%',
-       justifyContent: 'space-between'
-   },
-   mainButton:{
-       width: '100%',
-       backgroundColor: COLORS.buttonColor,
-       borderWidth: 2,        // Border width
-       borderColor: 'black',  // Border color
-       borderRadius: 8,       // Border radius (for rounded corners)
-       padding: 7,
-   },
-   buttonText:{
-       textAlign: 'center'
-   },
-   buttonSection:{
-       marginTop: '70%',
-       flexDirection: 'column',
-       gap: 3
-   },
-      marginSmaller:{
-           marginTop: 20,
-      },
-         marginLarger:{
-              marginTop: 40,
-         }
-});
-
 export default ViewInventoryUI;

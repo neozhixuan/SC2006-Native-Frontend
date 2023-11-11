@@ -5,35 +5,151 @@ import {
   FlatList,
   Pressable,
   Alert,
-  TextInput
+  TextInput,
+  ScrollView
 } from 'react-native';
-
+import { styles, COLORS } from "./styles";
+import { useState, useEffect } from "react";
+import { useForm, Controller } from 'react-hook-form';
 
 type InventoryProps = {
     setPage: ()=>void;
 }
 
 const ViewSuggestionsUI = (props: InventoryProps) => {
-    const mockData = [
-     {id: 0, name: "Big Mac", ingredient: "1x Chicken"},
-     {id: 1, name: "Fillet o Fish", ingredient: "1x Fish"},
-     {id: 2, name: "Chicken Nugget", ingredient: "2x Chicken"},
-    ]
+    const [suggestions, setSuggestions] = useState([{"id": 0,
+    "ItemName": "Fillet o' Fish",
+    "Ingredients": [{"Name": "Fish", "Quantity": 1}, {"Name": "Bun", "Quantity": 2}, {"Name": "Cheese", "Quantity" : 1}]
+    },
+    {"id": 1,
+    "ItemName": "Fruit Bowl", "Ingredients": [{"Name": "Orange", "Quantity": 1}, {"Name": "Apple", "Quantity": 1}]}
+    ]);
+    const [openTab, setOpenTab] = useState(suggestions[0].id);
+    const { control, handleSubmit, formState: { errors }, setValue } = useForm();
+
+
+    const onSubmit = (formData, itemName) => {
+        postData = {"ItemName": itemName, "Price": formData.price, "Description": formData.description};
+        console.log(`Attempting to submit ${itemName} to marketplace with price of ${formData.Price} and description: ${formData.Description}`);
+
+        fetch('http://10.0.2.2:8000/api/marketplace', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                // Add any other headers as needed
+              },
+              body: JSON.stringify(postData),
+            })
+              .then(response => response.json())
+              .then(data => {
+                // Handle the response data
+                console.log(` ${itemName} submitted to marketplace with price of ${formData.Price} and description: ${formData.Description}`);
+              })
+              .catch(error => {
+                // Handle errors
+                console.error('Error sending POST request:', error);
+              });
+    };
+
+
+//     const fetchSuggestions = async () => {
+//       try {
+//         const response = await fetch(
+//           'http://10.0.2.2:8000/api/suggestions',
+//         );
+//         const json = await response.json();
+//         setSuggestions(json);
+//         console.log(json);
+//         return json;
+//       } catch (error) {
+//         console.error(error);
+//       }
+//     };
+//
+//     useEffect(()=>{
+//         fetchSuggestions();
+//     }, [])
+
+    const changeTab = (id) => {
+        setValue("Price", "");
+        setValue("Description", "");
+        setOpenTab(id);
+    }
+
+
     // Render each item in the list
-    const renderItem = ({ item }) => (
-      <View style={styles.suggestionItem}>
-        <Text style={styles.normalText}>{item.name}</Text>
-        <Text>{item.ingredient}</Text>
-      </View>
-    );
+    const renderItem = ({ item }) => {
+      return(<View style={styles.suggestionItem}>
+        <Text style={{...styles.normalText, fontWeight:"900", marginBottom: 10}}>{item.ItemName}</Text>
+        <View style={styles.listStyle}>
+            {item.Ingredients.map((ingredient, idx)=>{
+              return(<View key={idx} style={styles.listItem}>
+                         <View style={styles.inputName}><Text style={styles.normalText}>{ingredient.Name}</Text></View>
+                         <View style={styles.inputQty}><Text style={{textAlign: "center", fontWeight: "600"}}>{ingredient.Quantity}</Text></View>
+                       </View>)
+            })}
+             {openTab !== item.id && <Pressable style={[styles.mainButton, styles.marginSmaller]} onPress={() => changeTab(item.id)}>
+                  <Text style={[styles.buttonText, styles.normalText]}>Post on Marketplace</Text>
+              </Pressable>}
+            {/* Price */}
+            {openTab === item.id && (<View><Controller
+              key={"Price"}
+              control={control}
+              render={({ field }) => (
+              <View>
+                    <Text style={[styles.normalText]}>Enter price of item:</Text>
+                    <View style={styles.inputItem}>
+                        <TextInput
+                            style={styles.normalInput}
+                            placeholder="Price"
+                            keyboardType="numeric"
+                            value={field.value}
+                            onChangeText={(text)=>field.onChange(text)}
+                        />
+                    </View>
+                    {errors["Price"] && <Text>{errors["Price"].message}</Text>}
+               </View>
+            )}
+              name={"Price"}
+              rules={{ required: `Price is required` }}
+            />
+
+            {/* Description */}
+            <Controller
+              key={"Description"}
+              control={control}
+              render={({ field }) => (
+                  <View>
+                      <Text style={[styles.normalText]}>Description:</Text>
+                      <View style={styles.inputItem}>
+                          <TextInput
+                              style={styles.normalInput}
+                              placeholder="Description"
+                              keyboardType="text"
+                              value={field.value}
+                              onChangeText={(text)=>field.onChange(text)}
+                          />
+                      </View>
+                      {errors["Description"] && <Text>{errors["Description"].message}</Text>}
+                  </View>
+              )}
+              name={"Description"}
+              rules={{ required: `Description is required` }}
+            />
+             <Pressable style={[styles.mainButton, styles.marginSmaller]} onPress={handleSubmit((formData) => onSubmit(formData, item.ItemName))}>
+                  <Text style={[styles.buttonText, styles.normalText]}>Submit</Text>
+              </Pressable></View>)}
+          </View>
+      </View>)
+    };
     return(
-            <View style={styles.mainBody}>
+            <ScrollView style={styles.mainBody}>
                    <View style={styles.container}>
                        <Text style={[styles.lightText, styles.headerText]}>View Suggestions</Text>
                       <View>
                       <View style={styles.listStyle}>
                           <FlatList
-                            data={mockData}
+                            data={suggestions}
                             renderItem={renderItem}
                             keyExtractor={(item) => item.id}
                           />
@@ -44,108 +160,7 @@ const ViewSuggestionsUI = (props: InventoryProps) => {
                       </View>
                    </View>
 
-               </View>)
+               </ScrollView>)
 }
-
-const COLORS = {
-light: '#FBF5E6',
-peach: '#C6847C',
-buttonColor: '#EBCABC'
-}
-
-const styles = StyleSheet.create({
-   mainBody: {
-       height: '100%',
-       flexDirection: 'column',
-       padding: 30,
-   },
-   container: {
-       flex: 1,
-   },
-   lightText:{
-       color: COLORS.light
-   },
-   headerText:{
-       fontSize: 30,
-       fontWeight: 900
-   },
-   normalText:{
-       fontSize: 20,
-       fontWeight: 'bold'
-   },
-   listStyle:{
-       flexDirection: 'column',
-       width: '100%'
-   },
-   listItem:{
-       flex: 1,
-       flexDirection: 'row',
-       width: '100%',
-       justifyContent: 'space-between'
-   },
-  inputItem:{
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      width: '100%',
-  },
-   mainButton:{
-       width: '100%',
-       backgroundColor: COLORS.buttonColor,
-       borderWidth: 2,        // Border width
-       borderColor: 'black',  // Border color
-       borderRadius: 8,       // Border radius (for rounded corners)
-       padding: 7,
-   },
-   buttonText:{
-       textAlign: 'center'
-   },
-   buttonSection:{
-       marginTop: '100%',
-       flexDirection: 'column',
-       gap: 3
-   },
-   inputName: {
-       height: 40,
-       width: "80%",
-       backgroundColor: COLORS.light,
-       borderWidth: 2,        // Border width
-       borderColor: 'black',  // Border color
-       borderRadius: 8,       // Border radius (for rounded corners)
-       padding: 10,
-   },
-    inputQty: {
-        height: 40,
-        margin: 12,
-       backgroundColor: COLORS.light,
-       borderWidth: 2,        // Border width
-       borderColor: 'black',  // Border color
-       borderRadius: 8,       // Border radius (for rounded corners)
-        padding: 10,
-    },
-   normalInput: {
-       height: 40,
-       width: "100%",
-       backgroundColor: COLORS.light,
-       borderWidth: 2,        // Border width
-       borderColor: 'black',  // Border color
-       borderRadius: 8,       // Border radius (for rounded corners)
-       padding: 10,
-   },
-   marginSmaller:{
-        marginTop: 20,
-   },
-      marginLarger:{
-           marginTop: 40,
-      },
-      suggestionItem: {
-            marginTop: 10,
-            backgroundColor: COLORS.light,
-            borderColor: "#000000",
-            borderRadius: 7,
-            borderWidth: 1,
-            padding: 10
-      }
-});
 
 export default ViewSuggestionsUI;
