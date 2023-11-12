@@ -34,6 +34,7 @@ const InventoryFormUI = (props: InventoryProps) => {
     const [date, setDate] = useState(new Date());
     const [showPicker, setShowPicker] = useState(false);
     const { control, handleSubmit, formState: { errors }, setValue } = useForm();
+    const [error, setError] = useState("");
 
     // Date Time Picker logic
     const toggleDatePicker = () => {
@@ -99,33 +100,36 @@ const InventoryFormUI = (props: InventoryProps) => {
         fetchItemNames();
     }, [])
 
-    // Submit Handler
-    const onSubmitHandler = () => {
-        console.log(items)
-    }
-
     // Submit Form Logic
-    const onSubmitForm = (formData, itemName) => {
-        postData = {"ItemName": itemName, "Price": formData.expiryDate, "Description": formData.password};
-        console.log(`Attempting to submit ${itemName} to backend with expiryDate of ${formData.expiryDate} and password: ${formData.password}`);
-
-        fetch('http://10.0.2.2:8000/api/marketplace', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // Add any other headers as needed
-            },
-            body: JSON.stringify(postData),
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Handle the response data
-                console.log(` ${itemName} submitted to backend with expiryDate of ${formData.expiryDate} and password: ${formData.password}`);
-            })
-            .catch(error => {
-                // Handle errors
-                console.error('Error sending POST request:', error);
-            });
+    const onSubmitForm = (formData) => {
+        for(item of items){
+            if(item.name==="" || item.qty === null){
+                setError((prevError)=> "Fill in all rows");
+                return;
+            }
+        }
+        for(item of items){
+            postData = {"item_name": item.name, "flow_rate": 1, "expiry_date": expiryDate, "quantity": item.qty, "entry_date": new Date()};
+            console.log(postData)
+            fetch('http://10.0.2.2:8000/api/marketplace', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Add any other headers as needed
+                },
+                body: JSON.stringify(postData),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the response data
+                    console.log(` ${item.name} submitted to backend`);
+                })
+                .catch(error => {
+                    // Handle errors
+                    console.error('Error sending POST request:', error);
+                });
+        }
+        props.setPage(0);
     };
 
     return(
@@ -134,6 +138,8 @@ const InventoryFormUI = (props: InventoryProps) => {
                 <Text style={[styles.lightText, styles.headerText]}>Inventory Form (New Shipment)</Text>
                 {/*Shipping Details*/}
                 <Text style={[styles.lightText, styles.normalText]}>Enter shipment details*:</Text>
+                {error !== "" && <Text>{error}</Text>}
+
                 <View style={{...styles.listStyle, ...styles.marginSmaller, gap: 65}}>
                     {items.map((item, idx) => (
                       <View style={styles.inputItem} key={idx}>
@@ -168,44 +174,38 @@ const InventoryFormUI = (props: InventoryProps) => {
                     ))}
                 </View>
                 {/*Expiry Date and Time*/}
-                <Controller
-                    key={"ExpiryDate"}
-                    control={control}
-                    render={({ field }) => (
-                        <View>
-                            <Text style={[styles.lightText, styles.normalText, styles.marginSpecial]}>Enter expiry date and time:</Text>
-                            <View style={styles.marginSmaller}>
-                                <View style={styles.inputItem}>
-                                    {showPicker && (
-                                        <DateTimePicker
-                                            mode= "date"
-                                            display= "spinner"
-                                            value= {date}
-                                            onChange= {onChangePicker}
-                                        />
-                                    )}
-                                    {!showPicker && (
-                                        <Pressable
-                                            onPress= {toggleDatePicker}
-                                        >
-                                            <TextInput
-                                                style={styles.normalInput}
-                                                placeholder="Sat Nov 11 2023"
-                                                value= {expiryDate}
-                                                onChangeText= {setExpiryDate}
-                                                placeholderTextColor="#11182744"
-                                                editable= {false}
-                                            />
-                                        </Pressable>
-                                    )}
-                                </View>
-                            </View>
-                            {errors["ExpiryDate"] && <Text style={[styles.marginSmaller]}>{errors["ExpiryDate"].message}</Text>}
+                <View>
+                    <Text style={[styles.lightText, styles.normalText, styles.marginSpecial]}>Enter expiry date and time:</Text>
+                    <View style={styles.marginSmaller}>
+                        <View style={styles.inputItem}>
+                            {showPicker && (
+                                <DateTimePicker
+                                    mode= "date"
+                                    display= "spinner"
+                                    placeholderTextColor="#11182744"
+                                    value= {date}
+                                    onChange= {onChangePicker}
+                                />
+                            )}
+                            {!showPicker && (
+                                <Pressable
+                                    onPress= {toggleDatePicker}
+                                >
+                                    <TextInput
+                                        style={styles.normalInput}
+                                        placeholder="Sat Nov 11 2023"
+                                        placeholderTextColor="#11182744"
+                                        value={expiryDate}
+                                        onChangeText= {setExpiryDate}
+                                        editable= {false}
+                                        color="black"
+                                    />
+                                </Pressable>
+                            )}
                         </View>
-                    )}
-                    name={"ExpiryDate"}
-                    rules={{ required: `ExpiryDate is required` }}
-                />
+                    </View>
+                    {errors["ExpiryDate"] && <Text style={[styles.marginSmaller]}>{errors["ExpiryDate"].message}</Text>}
+                </View>
                 {/*Password*/}
                 <Controller
                     key={"Password"}
@@ -220,6 +220,8 @@ const InventoryFormUI = (props: InventoryProps) => {
                                         placeholder="Item"
                                         keyboardType="numeric"
                                         placeholderTextColor="#11182744"
+                                        value={field.value}
+                                        onChangeText={(text)=>field.onChange(text)}
                                     />
 
                                 </View>
@@ -232,7 +234,7 @@ const InventoryFormUI = (props: InventoryProps) => {
                 />
                 {/* Rows of buttons */}
                 <View style={styles.marginLarger}>
-                   <Pressable style={styles.mainButton} onPress={handleSubmit((formData) => onSubmitForm(formData, item.name))}>
+                   <Pressable style={styles.mainButton} onPress={handleSubmit((formData) => onSubmitForm(formData))}>
                         <Text style={[styles.buttonText, styles.normalText]}>Submit</Text>
                     </Pressable>
                    <Pressable style={[styles.mainButton, styles.marginSmaller]} onPress={() => props.setPage(0)}>

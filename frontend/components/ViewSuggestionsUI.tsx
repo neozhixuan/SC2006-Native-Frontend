@@ -27,7 +27,6 @@ const ViewSuggestionsUI = (props: InventoryProps) => {
     const [openTab, setOpenTab] = useState(suggestions[0].id);
     const { control, handleSubmit, formState: { errors }, setValue } = useForm();
 
-
     const onSubmit = (formData, itemName) => {
         postData = {"ItemName": itemName, "Price": formData.price, "Description": formData.description};
         console.log(`Attempting to submit ${itemName} to marketplace with price of ${formData.Price} and description: ${formData.Description}`);
@@ -92,7 +91,8 @@ const ViewSuggestionsUI = (props: InventoryProps) => {
                   <Text style={[styles.buttonText, styles.normalText]}>Post on Marketplace</Text>
               </Pressable>}
             {/* Price */}
-            {openTab === item.id && (<View><Controller
+            {openTab === item.id && (<View>
+            <Controller
               key={"Price"}
               control={control}
               render={({ field }) => (
