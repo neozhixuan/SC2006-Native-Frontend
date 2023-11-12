@@ -8,6 +8,7 @@ import {
   TextInput
 } from 'react-native';
 import { styles, COLORS } from "./styles";
+import {Picker} from '@react-native-picker/picker';
 
 // Chart Library //
 import { Dimensions } from "react-native";
@@ -24,9 +25,21 @@ type InventoryProps = {
 }
 
 const ViewPredictionsUI = (props: InventoryProps) => {
-    const [histoData, setHistoData] = useState([1,2,3,4,5]);
-    const [predictions, setPredictions] = useState([]);
-
+    const monthData = [
+                    120.3, 119.8, 120.1, 120.5, 119.7, 120.2, 119.9, 120.4, 120.0, 120.1,
+                    119.8, 120.2, 120.4, 119.9, 120.0, 119.7, 120.3, 120.1, 120.5, 119.8,
+                    120.0, 120.2, 119.7, 120.4, 120.3, 119.9, 120.1, 119.8, 120.5, 120.0
+                  ];
+    const month = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
+    const [histoData, setHistoData] = useState(monthData);
+    const [labels, setLabels] = useState(month)
+    const [predictions, setPredictions] = useState([
+                                                        {id: 0, name: "Apple", quantity: 10},
+                                                        {id: 1, name: "Orange", quantity: 10},
+                                                        {id: 2, name: "Guava", quantity: 15},
+                                                       ]);
+    const [timeframe, setTimeframe] = useState("1 month");
+    const options = ["1 month", "1 week"]
     const fetchPredictions = async () => {
       try {
         const response = await fetch(
@@ -45,28 +58,31 @@ const ViewPredictionsUI = (props: InventoryProps) => {
         fetchPredictions();
     }, [])
 
-    const mockData = [
-     {id: 0, name: "Apple", quantity: 10},
-     {id: 1, name: "Orange", quantity: 10},
-     {id: 2, name: "Guava", quantity: 15},
-    ]
     // Render each item in the list
     const renderItem = ({ item }) => (
-      <View style={styles.listItem}>
-        <Text style={styles.normalText}>{item.name}</Text>
-        <Text style={styles.normalText}>{item.quantity}</Text>
+      <View key={item.index} style={styles.listItem}>
+        <View style={styles.inputName}><Text style={styles.normalText}>{item.name}</Text></View>
+        <View style={styles.inputQty}><Text style={{textAlign: "center", fontWeight: "600"}}>{item.quantity}</Text></View>
       </View>
     );
+
+    const setHistogramView = (itemValue) => {
+        setTimeframe(itemValue);
+        itemValue === "1 month" ? setHistoData(monthData) : setHistoData(monthData.slice(22,30));
+        itemValue === "1 month" ? setLabels(month) : setLabels(month.slice(22,30));
+
+    }
+
     const data = {
-      labels: ["January", "February", "March", "April", "May", "June"],
+      labels: labels,
       datasets: [
         {
-          data: [20, 45, 28, 80, 99, 43],
+          data: histoData,
           color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
           strokeWidth: 2 // optional
         }
       ],
-      legend: ["Rainy Days"] // optional
+      legend: ["Sales"] // optional
     };
 
     const chartConfig = {
@@ -83,9 +99,19 @@ const ViewPredictionsUI = (props: InventoryProps) => {
     return(
         <View style={styles.mainBody}>
                    <View style={styles.container}>
-                          <Text style={[styles.lightText, styles.headerText]}>Analytics</Text>
-                        <Text style={[styles.lightText, styles.normalText]}>DATA ON DEMAND</Text>
-
+                         <Text style={[styles.lightText, styles.headerText]}>Analytics</Text>
+                         <View style={{flexDirection: "row", justifyContent: "space-between"}}>
+                            <Text style={[styles.lightText, styles.normalText, styles.marginSmaller]}>Data over {timeframe}</Text>
+                            <Picker
+                              style={{width: 150, backgroundColor: COLORS.light, height: 20}}
+                              selectedValue={timeframe}
+                              onValueChange={(itemValue, itemIndex) => setHistogramView(itemValue)}
+                            >
+                            {options.map((item, index) => (
+                                <Picker.Item label={item} value={item} key={index} />
+                            ))}
+                            </Picker>
+                         </View>
                          <View>
                              <LineChart
                                data={data}
@@ -96,10 +122,10 @@ const ViewPredictionsUI = (props: InventoryProps) => {
 
                          </View>
                        <Text style={[styles.lightText, styles.headerText]}>Usage Predictions</Text>
-                      <View>
+                      <View style={{marginBottom: 10}}>
                           <View style={styles.listStyle}>
                               <FlatList
-                                data={mockData}
+                                data={predictions}
                                 renderItem={renderItem}
                                 keyExtractor={(item) => item.id}
                               />
