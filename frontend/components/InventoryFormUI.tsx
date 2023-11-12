@@ -13,6 +13,7 @@ import { useEffect, useState, useCallback } from 'react';
 import {Picker} from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { styles, COLORS } from "./styles";
+import { useForm, Controller } from 'react-hook-form';
 
 type InventoryProps = {
     setPage: ()=>void;
@@ -32,6 +33,7 @@ const InventoryFormUI = (props: InventoryProps) => {
     const [expiryDate, setExpiryDate] = useState("")
     const [date, setDate] = useState(new Date());
     const [showPicker, setShowPicker] = useState(false);
+    const { control, handleSubmit, formState: { errors }, setValue } = useForm();
 
     // Date Time Picker logic
     const toggleDatePicker = () => {
@@ -102,6 +104,30 @@ const InventoryFormUI = (props: InventoryProps) => {
         console.log(items)
     }
 
+    // Submit Form Logic
+    const onSubmitForm = (formData, itemName) => {
+        postData = {"ItemName": itemName, "Price": formData.expiryDate, "Description": formData.password};
+        console.log(`Attempting to submit ${itemName} to backend with expiryDate of ${formData.expiryDate} and password: ${formData.password}`);
+
+        fetch('http://10.0.2.2:8000/api/marketplace', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any other headers as needed
+            },
+            body: JSON.stringify(postData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle the response data
+                console.log(` ${itemName} submitted to backend with expiryDate of ${formData.expiryDate} and password: ${formData.password}`);
+            })
+            .catch(error => {
+                // Handle errors
+                console.error('Error sending POST request:', error);
+            });
+    };
+
     return(
         <View style={styles.mainBody}>
             <View style={styles.container}>
@@ -142,50 +168,71 @@ const InventoryFormUI = (props: InventoryProps) => {
                     ))}
                 </View>
                 {/*Expiry Date and Time*/}
-                <Text style={[styles.lightText, styles.normalText, styles.marginSpecial]}>Enter expiry date and time:</Text>
-                <View style={styles.marginSmaller}>
-                    <View style={styles.inputItem}>
-                        {showPicker && (
-                            <DateTimePicker
-                                mode= "date"
-                                display= "spinner"
-                                value= {date}
-                                onChange= {onChangePicker}
-
-                            />
-                        )}
-                        {!showPicker && (
-                            <Pressable
-                                onPress= {toggleDatePicker}
-                            >
-                                <TextInput
-                                    style={styles.normalInput}
-                                    placeholder="Sat Nov 11 2023"
-                                    value= {expiryDate}
-                                    onChangeText= {setExpiryDate}
-                                    placeholderTextColor="#11182744"
-                                    editable= {false}
-                                />
-                            </Pressable>
-                        )}
-                    </View>
-                </View>
+                <Controller
+                    key={"ExpiryDate"}
+                    control={control}
+                    render={({ field }) => (
+                        <View>
+                            <Text style={[styles.lightText, styles.normalText, styles.marginSpecial]}>Enter expiry date and time:</Text>
+                            <View style={styles.marginSmaller}>
+                                <View style={styles.inputItem}>
+                                    {showPicker && (
+                                        <DateTimePicker
+                                            mode= "date"
+                                            display= "spinner"
+                                            value= {date}
+                                            onChange= {onChangePicker}
+                                        />
+                                    )}
+                                    {!showPicker && (
+                                        <Pressable
+                                            onPress= {toggleDatePicker}
+                                        >
+                                            <TextInput
+                                                style={styles.normalInput}
+                                                placeholder="Sat Nov 11 2023"
+                                                value= {expiryDate}
+                                                onChangeText= {setExpiryDate}
+                                                placeholderTextColor="#11182744"
+                                                editable= {false}
+                                            />
+                                        </Pressable>
+                                    )}
+                                </View>
+                            </View>
+                            {errors["ExpiryDate"] && <Text style={[styles.marginSmaller]}>{errors["ExpiryDate"].message}</Text>}
+                        </View>
+                    )}
+                    name={"ExpiryDate"}
+                    rules={{ required: `ExpiryDate is required` }}
+                />
                 {/*Password*/}
-                <Text style={[styles.lightText, styles.normalText, styles.marginLarger]}>Enter password:</Text>
-                <View style={styles.listStyle, styles.marginSmaller}>
-                    <View style={styles.inputItem}>
-                        <TextInput
-                            style={styles.normalInput}
-                            placeholder="Item"
-                            keyboardType="numeric"
-                            placeholderTextColor="#11182744"
-                        />
+                <Controller
+                    key={"Password"}
+                    control={control}
+                    render={({ field }) => (
+                        <View>
+                            <Text style={[styles.lightText, styles.normalText, styles.marginLarger]}>Enter password:</Text>
+                            <View style={styles.listStyle, styles.marginSmaller}>
+                                <View style={styles.inputItem}>
+                                    <TextInput
+                                        style={styles.normalInput}
+                                        placeholder="Item"
+                                        keyboardType="numeric"
+                                        placeholderTextColor="#11182744"
+                                    />
 
-                    </View>
-                </View>
+                                </View>
+                            </View>
+                            {errors["Password"] && <Text style={[styles.marginSmaller]}>{errors["Password"].message}</Text>}
+                        </View>
+                    )}
+                    name={"Password"}
+                    rules={{ required: `Password is required` }}
+                />
                 {/* Rows of buttons */}
                 <View style={styles.marginLarger}>
-                   <Pressable style={styles.mainButton} onPress={onSubmitHandler}>
+                   <Pressable style={styles.mainButton} onPress={handleSubmit((formData) => onSubmitForm(formData, item.name))}>
                         <Text style={[styles.buttonText, styles.normalText]}>Submit</Text>
                     </Pressable>
                    <Pressable style={[styles.mainButton, styles.marginSmaller]} onPress={() => props.setPage(0)}>

@@ -125,7 +125,7 @@ const ViewSuggestionsUI = (props: InventoryProps) => {
                           <TextInput
                               style={styles.normalInput}
                               placeholder="Description"
-                              keyboardType="text"
+                              keyboardType="default"
                               value={field.value}
                               onChangeText={(text)=>field.onChange(text)}
                           />
