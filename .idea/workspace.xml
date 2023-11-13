@@ -7,6 +7,7 @@
     <list default="true" id="d890404e-9e8b-4d27-b81c-4e77e6e76678" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/components/InventoryFormUI.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/components/InventoryFormUI.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/components/ViewPredictionsUI.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/components/ViewPredictionsUI.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/yarn.lock" afterDir="false" />
     </list>

@@ -5,7 +5,8 @@ import {
   FlatList,
   Pressable,
   Alert,
-  TextInput
+  TextInput,
+  ScrollView
 } from 'react-native';
 import { styles, COLORS } from "./styles";
 import {Picker} from '@react-native-picker/picker';
@@ -38,6 +39,8 @@ const ViewPredictionsUI = (props: InventoryProps) => {
                                                         {id: 1, name: "Orange", quantity: 10},
                                                         {id: 2, name: "Guava", quantity: 15},
                                                        ]);
+    const [orders, setOrders] = useState([{id: 0, ItemName: "Test", Quantity: 10, ExpiryDate: "10 March"}, {id: 1, ItemName: "Test", Quantity: 10, ExpiryDate: "10 March"}])
+
     const [timeframe, setTimeframe] = useState("1 month");
     const options = ["1 month", "1 week"]
     const fetchPredictions = async () => {
@@ -59,12 +62,61 @@ const ViewPredictionsUI = (props: InventoryProps) => {
     }, [])
 
     // Render each item in the list
-    const renderItem = ({ item }) => (
-      <View key={item.index} style={styles.listItem}>
+    const renderItem = ({ item }) => {
+      const check = 2;
+      for(order of orders){
+        if(item.name === order.ItemName){
+            if(order.quantity < item.quantity){
+                check = 0;
+            }
+            else if(order.quantity === item.quantity){
+                check = 1;
+            }
+        }
+      }
+        const predStyle = {
+          textAlign: "center",
+          fontWeight: "600",
+          color: check === 2 ? "red" : check === 1 ? "yellow" : "green"
+        };
+      return(<View key={item.index} style={{...styles.listItem, marginTop: 5}}>
         <View style={styles.inputName}><Text style={styles.normalText}>{item.name}</Text></View>
-        <View style={styles.inputQty}><Text style={{textAlign: "center", fontWeight: "600"}}>{item.quantity}</Text></View>
-      </View>
-    );
+        <View style={styles.inputQty}><Text style={predStyle}>{item.quantity}</Text></View>
+      </View>)
+    };
+    // Render each item in the list
+    const renderOrders = ({ item }) => {
+      // Green = 2, yellow = 1, red = 0
+      const check = 2;
+      for(pred of predictions){
+        if(pred.name === item.ItemName){
+            if(item.quantity < pred.quantity){
+                check = 0;
+            }
+            else if(item.quantity === pred.quantity){
+                check = 1;
+            }
+        }
+      }
+      const orderStyle = {
+        textAlign: "center",
+        fontWeight: "600",
+        color: check === 2 ? "green" : check === 1 ? "yellow" : "red"
+      };
+
+      return (
+        <View key={item.id}>
+          <View style={{ ...styles.listItem, marginTop: 5 }}>
+            <View style={styles.inputName}>
+              <Text style={styles.normalText}>{item.ItemName}</Text>
+            </View>
+            <View style={styles.inputQty}>
+              <Text style={orderStyle}>{item.Quantity}</Text>
+            </View>
+          </View>
+        </View>
+      );
+    };
 
     const setHistogramView = (itemValue) => {
         setTimeframe(itemValue);
@@ -97,7 +149,7 @@ const ViewPredictionsUI = (props: InventoryProps) => {
       useShadowColorFromDataset: false // optional
     };
     return(
-        <View style={styles.mainBody}>
+        <ScrollView style={styles.mainBody}>
                    <View style={styles.container}>
                          <Text style={[styles.lightText, styles.headerText]}>Analytics</Text>
                          <View style={{flexDirection: "row", justifyContent: "space-between"}}>
@@ -130,13 +182,23 @@ const ViewPredictionsUI = (props: InventoryProps) => {
                                 keyExtractor={(item) => item.id}
                               />
                           </View>
+                         <Text style={[styles.lightText, styles.headerText]}>vs. Actual Inventory</Text>
+                        <View style={{marginBottom: 10}}>
+                            <View style={styles.listStyle}>
+                                <FlatList
+                                  data={orders}
+                                  renderItem={renderOrders}
+                                  keyExtractor={(item) => item.id}
+                                />
+                            </View>
+                        </View>
                          <Pressable style={[styles.mainButton, styles.marginSmaller]} onPress={() => props.setPage(0)}>
                               <Text style={[styles.buttonText, styles.normalText]}>Return</Text>
                           </Pressable>
                       </View>
                    </View>
 
-        </View>
+        </ScrollView>
    )
 }
 
