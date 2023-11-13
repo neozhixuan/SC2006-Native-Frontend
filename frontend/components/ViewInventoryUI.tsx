@@ -6,67 +6,57 @@ import {
   Pressable,
   Alert,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { styles, COLORS } from "./styles";
 
+import {ItemType} from "../App.tsx"
+
 type InventoryProps = {
     setPage: ()=>void;
+    orders: ItemType
 }
 
 const ViewInventoryUI = (props: InventoryProps) => {
-    const [orders, setOrders] = useState([{id: 0, ItemName: "Test", Quantity: 10, ExpiryDate: "10 March"}, {id: 1, ItemName: "Test", Quantity: 10, ExpiryDate: "10 March"}])
     const [toggleAccordion, setToggleAccordion] = useState(null);
-
-//     const downArrow = (
-//         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000" height="800px" width="800px" version="1.1" id="Layer_1" viewBox="0 0 330 330" xml:space="preserve">
-//         <path id="XMLID_225_" d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393  c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393  s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"/>
-//         </svg>
-//     )
-
-//     const fetchOrders = async () => {
-//       try {
-//         const response = await fetch(
-//           'http://10.0.2.2:8000/api/orderdata/',
-//         );
-//         const json = await response.json();
-//         setOrders(json);
-//         console.log(json);
-//         return json;a
-//       } catch (error) {
-//         console.error(error);
-//       }
-//     };
-//
-//     useEffect(()=>{
-//         fetchOrders();
-//     }, [])
-
-    // Render each item in the list
-    const renderItem = ({ item }) => (
-    <View key = {item.id}>
-      <View style={{...styles.listItem, marginTop: 5}}>
-        <Pressable onPress={()=>{toggleAccordion !== null ? setToggleAccordion(null) : setToggleAccordion(item.id)}} style={{...styles.inputName, flexDirection: "row", justifyContent: "space-between"}}><Text style={styles.normalText}>{item.ItemName}</Text><Text>\/</Text></Pressable>
-        <View style={styles.inputQty}><Text style={{textAlign: "center", fontWeight: "600"}}>{item.Quantity}</Text></View>
-      </View>
-      {toggleAccordion === item.id && <View style={{...styles.inputName}}>
-        <Text>Expiry Date: {item.ExpiryDate}</Text>
-      </View>}
-    </View>
-    );
+    let uniqueItems = []
 
     return(
-        <View style={styles.mainBody}>
-            <View style={styles.container}>
+        <ScrollView style={styles.mainBody}>
+            <View style={{...styles.container, height: "80%"}}>
                 <Text style={[styles.lightText, styles.headerText]}>Inventory</Text>
-                <View style={styles.listStyle}>
-                    <FlatList
-                      data={orders}
-                      renderItem={renderItem}
-                      keyExtractor={(item) => item.id}
-                    />
-                </View>
+                <ScrollView style={{...styles.listStyle, height: 400}}>
+                    {props.orders.map((item)=>{
+                        if(uniqueItems.includes(item.ItemName)){
+                            return;
+                        }
+                        uniqueItems.push(item.ItemName);
+                        let qtys = 0;
+                        let expiryList = []
+                        for(order of props.orders){
+                            if(order.ItemName === item.ItemName){
+                                qtys += order.Quantity;
+                                expiryList.push([order.Quantity, item.ExpiryDate]);
+                            }
+                        }
+                        return(<View key = {item.id} style={{flex: 1}}>
+                              <View style={{...styles.listItem}}>
+                                <Pressable onPress={()=>{toggleAccordion !== null ? setToggleAccordion(null) : setToggleAccordion(item.id)}} style={{...styles.inputName, flexDirection: "row", justifyContent: "space-between"}}><Text style={styles.normalText}>{item.ItemName}</Text><Text style={{paddingRight: 5, fontSize: 20, fontWeight: 900}}>&darr;</Text></Pressable>
+                                <View style={styles.inputQty}><Text style={{textAlign: "center", fontWeight: "600"}}>{qtys}</Text></View>
+                              </View>
+                          {toggleAccordion === item.id && <View style={{...styles.inputName, height: "fit-content"}}>
+                            {expiryList.map((exp,index)=>(
+                                <View key={index}>
+                                    <Text>{exp[0]}x: {exp[1]}</Text>
+                                </View>
+                            ))}
+                          </View>}
+                        </View>)
+                    })}
+
+                </ScrollView>
                 <View style={styles.buttonSection}>
                     <Pressable style={styles.mainButton} onPress={() => props.setPage(1)}>
                         <Text style={[styles.buttonText, styles.normalText]}>Fill in Inventory Form</Text>
@@ -79,7 +69,7 @@ const ViewInventoryUI = (props: InventoryProps) => {
                     </Pressable>
                 </View>
             </View>
-        </View>
+        </ScrollView>
     )
 }
 export default ViewInventoryUI;

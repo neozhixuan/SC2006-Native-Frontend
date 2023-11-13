@@ -19,18 +19,53 @@ import ViewInventoryUI from "./components/ViewInventoryUI"
 import InventoryFormUI from "./components/InventoryFormUI"
 import ViewPredictionsUI from "./components/ViewPredictionsUI"
 import ViewSuggestionsUI from "./components/ViewSuggestionsUI"
-
+import NotificationAlert from "./components/NotificationAlert"
+export interface ItemType {
+  id: number;
+  ItemName: string;
+  Quantity: number;
+  ExpiryDate: string;
+}
 
 function App(): JSX.Element {
+  const [orders, setOrders] = useState([{id: 0, ItemName: "Burger Bun", Quantity: 50, ExpiryDate: "10 March"}, {id: 1, ItemName: "Burger Bun", Quantity: 20, ExpiryDate: "12 March"}, {id: 2, ItemName: "Fish Patty", Quantity: 5, ExpiryDate: "10 March"}, {id: 3, ItemName: "Cheese Slice", Quantity: 30, ExpiryDate: "10 March"},  {id: 4, ItemName: "Egg", Quantity: 120, ExpiryDate: "10 March"}, {id: 5, ItemName: "Potato Fries", Quantity: 150, ExpiryDate: "10 March"}])
+  const [lowStock, setLowStock] = useState([{id: 0, ItemName: "Fish Patty", Quantity: 5}]);
+  const [suppliers, setSupplier] = useState([{id:0, Name: "Sheng Siong", ItemName: "Fish Patty", PhoneNumber: 81234567}])
+  const [page, setPage] = useState(0);
+  const [showNotification, setShowNotification] = useState(true);
 
-  const [page, setPage] = useState(0)
+//     const fetchOrders = async () => {
+//       try {
+//         const response = await fetch(
+//           'http://10.0.2.2:8000/api/orderdata/',
+//         );
+//         const json = await response.json();
+//         setOrders(json);
+//         console.log(json);
+//         return json;a
+//       } catch (error) {
+//         console.error(error);
+//       }
+//     };
+//
+//     useEffect(()=>{
+//         fetchOrders();
+//     }, [])
 
   return (
     <SafeAreaView style={styles.backgroundStyle}>
+        {(showNotification && lowStock.length > 0) &&  (
+          <NotificationAlert
+            lowStock={lowStock}
+            suppliers={suppliers}
+            message="This is a notification message."
+            onClose={()=>setShowNotification(false)}
+          />
+        )}
         <Navbar/>
-        {page === 0 && <ViewInventoryUI setPage={setPage}/>}
+        {page === 0 && <ViewInventoryUI setPage={setPage} orders={orders}/>}
         {page === 1 && <InventoryFormUI setPage={setPage}/>}
-        {page === 2 && <ViewPredictionsUI setPage={setPage}/>}
+        {page === 2 && <ViewPredictionsUI setPage={setPage}  orders={orders}/>}
         {page === 3 && <ViewSuggestionsUI setPage={setPage}/>}
     </SafeAreaView>
   );

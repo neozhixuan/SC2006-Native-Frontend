@@ -29,12 +29,13 @@ export const styles = StyleSheet.create({
    },
    // List styles
    listStyle:{
+       flex: 1,
        flexDirection: 'column',
        width: '100%',
-       gap: 3
+
    },
    listItem:{
-       flex: 1,
+        marginTop: 5,
        flexDirection: 'row',
        width: '100%',
        justifyContent: 'space-between',
@@ -92,7 +93,6 @@ export const styles = StyleSheet.create({
      textAlign: 'center'
     },
     buttonSection:{
-     marginTop: '60%',
      flexDirection: 'column',
      gap: 3
     },
@@ -112,7 +112,6 @@ export const styles = StyleSheet.create({
    },
    pickerStyle:{
        width: "70%",
-       marginTop: 40,
        backgroundColor: COLORS.light,
        borderWidth: 2,        // Border width
        borderColor: 'black',  // Border color

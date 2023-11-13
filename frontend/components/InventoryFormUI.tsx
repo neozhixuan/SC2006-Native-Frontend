@@ -8,6 +8,7 @@ import {
   Platform,
   Alert,
   TextInput,
+  ScrollView,
 } from 'react-native';
 import { useEffect, useState, useCallback } from 'react';
 import {Picker} from '@react-native-picker/picker';
@@ -133,19 +134,19 @@ const InventoryFormUI = (props: InventoryProps) => {
     };
 
     return(
-        <View style={styles.mainBody}>
-            <View style={styles.container}>
+        <ScrollView style={styles.mainBody}>
+            <View style={{...styles.container, height: "80%"}}>
                 <Text style={[styles.lightText, styles.headerText]}>Inventory Form (New Shipment)</Text>
                 {/*Shipping Details*/}
                 <Text style={[styles.lightText, styles.normalText]}>Enter shipment details*:</Text>
                 {error !== "" && <Text>{error}</Text>}
 
-                <View style={{...styles.listStyle, ...styles.marginSmaller, gap: 65}}>
-                    {items.map((item, idx) => (
-                      <View style={styles.inputItem} key={idx}>
+                <View style={{flexDirection:"column"}}>
+                    {items.map((item, idx) => {
+                      return(<View style={{flexDirection: "row"}} key={idx}>
                         <View style={styles.pickerStyle}>
                           <Picker
-                              style={styles.picker}
+//                               style={styles.picker}
                               selectedValue={item.name}
                               onValueChange={(itemValue, itemIndex) => {
                                 handleUpdateItem("name", idx, itemValue)
@@ -158,25 +159,25 @@ const InventoryFormUI = (props: InventoryProps) => {
                           </Picker>
                         </View>
                         <TextInput
-                          style={{...styles.inputQty, height:60, marginTop: 40, width: 50}}
+                          style={{...styles.inputQty, height:60, width: 50}}
                           placeholder="Qty"
                           keyboardType="numeric"
                           onChangeText={(text) => handleUpdateItem("qty", idx, text)}
                         />
                         {idx === 0 ? (
-                        <Pressable style={{...styles.inputQty, height:60, marginTop: 40, width: 50}} onPress={handleAddItem}>
-                          <Text>+</Text>
+                        <Pressable style={{...styles.inputQty, height:60,  width: 50}} onPress={handleAddItem}>
+                          <Text style={{fontSize: 25, textAlign: "center"}}>+</Text>
                         </Pressable>) : (
-                        <Pressable style={{...styles.inputQty, height:60, marginTop: 40, width: 50}} onPress={() => handleRemoveItem(idx)}>
-                          <Text>-</Text>
+                        <Pressable style={{...styles.inputQty, height:60,  width: 50}} onPress={() => handleRemoveItem(idx)}>
+                          <Text style={{fontSize: 25, textAlign: "center"}}>-</Text>
                         </Pressable>)}
-                      </View>
-                    ))}
+                      </View>)
+                    })}
                 </View>
                 {/*Expiry Date and Time*/}
                 <View>
-                    <Text style={[styles.lightText, styles.normalText, styles.marginSpecial]}>Enter expiry date and time:</Text>
-                    <View style={styles.marginSmaller}>
+                    <Text style={[styles.lightText, styles.normalText, styles.marginSmaller]}>Enter expiry date and time:</Text>
+                    <View>
                         <View style={styles.inputItem}>
                             {showPicker && (
                                 <DateTimePicker
@@ -190,6 +191,7 @@ const InventoryFormUI = (props: InventoryProps) => {
                             {!showPicker && (
                                 <Pressable
                                     onPress= {toggleDatePicker}
+                                    style={{width: "100%"}}
                                 >
                                     <TextInput
                                         style={styles.normalInput}
@@ -212,8 +214,8 @@ const InventoryFormUI = (props: InventoryProps) => {
                     control={control}
                     render={({ field }) => (
                         <View>
-                            <Text style={[styles.lightText, styles.normalText, styles.marginLarger]}>Enter password:</Text>
-                            <View style={styles.listStyle, styles.marginSmaller}>
+                            <Text style={[styles.lightText, styles.normalText, styles.marginSmaller]}>Enter password:</Text>
+                            <View style={styles.listStyle}>
                                 <View style={styles.inputItem}>
                                     <TextInput
                                         style={styles.normalInput}
@@ -242,7 +244,7 @@ const InventoryFormUI = (props: InventoryProps) => {
                     </Pressable>
                 </View>
             </View>
-        </View>
+        </ScrollView>
     )
 }
 
