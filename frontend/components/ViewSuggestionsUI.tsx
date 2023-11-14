@@ -51,23 +51,23 @@ const ViewSuggestionsUI = (props: InventoryProps) => {
     };
 
 
-//     const fetchSuggestions = async () => {
-//       try {
-//         const response = await fetch(
-//           'http://10.0.2.2:8000/api/suggestions',
-//         );
-//         const json = await response.json();
-//         setSuggestions(json);
-//         console.log(json);
-//         return json;
-//       } catch (error) {
-//         console.error(error);
-//       }
-//     };
-//
-//     useEffect(()=>{
-//         fetchSuggestions();
-//     }, [])
+    const fetchSuggestions = async () => {
+      try {
+        const response = await fetch(
+          'http://10.0.2.2:8000/api/suggestions',
+        );
+        const json = await response.json();
+        setSuggestions(json);
+        console.log(json);
+        return json;
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    useEffect(()=>{
+        fetchSuggestions();
+    }, [])
 
     const changeTab = (id) => {
         setValue("Price", "");
