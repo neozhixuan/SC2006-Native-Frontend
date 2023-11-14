@@ -18,6 +18,8 @@ import { useForm, Controller } from 'react-hook-form';
 
 type InventoryProps = {
     setPage: ()=>void;
+    onFormSubmit: () => void;
+
 }
 
 const emptyItem = {
@@ -102,35 +104,51 @@ const InventoryFormUI = (props: InventoryProps) => {
     }, [])
 
     // Submit Form Logic
-    const onSubmitForm = (formData) => {
-        for(item of items){
-            if(item.name==="" || item.qty === null){
-                setError((prevError)=> "Fill in all rows");
-                return;
-            }
-        }
-        for(item of items){
-            postData = {"item_name": item.name, "flow_rate": 1, "expiry_date": expiryDate, "quantity": item.qty, "entry_date": new Date()};
-            console.log(postData)
-            fetch('http://10.0.2.2:8000/api/marketplace', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // Add any other headers as needed
-                },
-                body: JSON.stringify(postData),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Handle the response data
-                    console.log(` ${item.name} submitted to backend`);
-                })
-                .catch(error => {
-                    // Handle errors
-                    console.error('Error sending POST request:', error);
+    const onSubmitForm = async (formData) => {
+        try {
+            for (const item of items) {
+                if (item.name === "" || item.qty === null) {
+                    setError("Fill in all rows");
+                    return;
+                }
+
+                const postData = {
+                    "item_name": item.name,
+                    "flow_rate": 1,
+                    "expiry_date": new Date(expiryDate).toISOString(),
+                    "quantity": item.qty,
+                    "entry_date": new Date(),
+                };
+
+                console.log(postData);
+
+                const response = await fetch('http://10.0.2.2:8000/fn/createInventory/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Add any other headers as needed
+                    },
+                    body: JSON.stringify(postData),
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log(`${item.name} submitted to backend`, data);
+            }
+
+            // Reset error state
+            setError("");
+            // Trigger the parent callback to refresh data
+            props.handleFormSubmit();
+            // Navigate to another page or perform other actions
+            props.setPage(0);
+        } catch (error) {
+            console.error('Error sending POST request:', error);
+            // Handle errors here if needed
         }
-        props.setPage(0);
     };
 
     return(
@@ -222,10 +240,10 @@ const InventoryFormUI = (props: InventoryProps) => {
                                         placeholder="Item"
                                         keyboardType="numeric"
                                         placeholderTextColor="#11182744"
+                                        secureTextEntry={true}
                                         value={field.value}
                                         onChangeText={(text)=>field.onChange(text)}
                                     />
-
                                 </View>
                             </View>
                             {errors["Password"] && <Text style={[styles.marginSmaller]}>{errors["Password"].message}</Text>}

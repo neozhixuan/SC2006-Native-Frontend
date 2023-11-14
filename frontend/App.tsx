@@ -11,7 +11,7 @@ import {
   Alert
 } from 'react-native';
 
-import {useState} from 'react';
+import { useState, useEffect } from 'react';
 
 import Navbar from "./components/Navbar"
 import Test from "./components/Test"
@@ -22,36 +22,41 @@ import ViewSuggestionsUI from "./components/ViewSuggestionsUI"
 import NotificationAlert from "./components/NotificationAlert"
 export interface ItemType {
   id: number;
-  ItemName: string;
-  Quantity: number;
-  ExpiryDate: string;
+  item_name: string;
+  quantity: number;
+  expiry_date: string;
+  flow_rate: number;
 }
 
 function App(): JSX.Element {
-  const [orders, setOrders] = useState([{id: 0, ItemName: "Burger Bun", Quantity: 50, ExpiryDate: "10 March"}, {id: 1, ItemName: "Burger Bun", Quantity: 20, ExpiryDate: "12 March"}, {id: 2, ItemName: "Fish Patty", Quantity: 5, ExpiryDate: "10 March"}, {id: 3, ItemName: "Cheese Slice", Quantity: 30, ExpiryDate: "10 March"},  {id: 4, ItemName: "Egg", Quantity: 120, ExpiryDate: "10 March"}, {id: 5, ItemName: "Potato Fries", Quantity: 150, ExpiryDate: "10 March"}])
+  const [orders, setOrders] = useState([{id: 0, item_name: "Burger Bun", quantity: 50, expiry_date: "10 March", flow_rate: 0}, {id: 1, item_name: "Burger Bun", quantity: 20, expiry_date: "12 March", flow_rate: 0}, {id: 2, item_name: "Fish Patty", quantity: 5, expiry_date: "10 March", flow_rate: 0}, {id: 3, item_name: "Cheese Slice", quantity: 30, expiry_date: "10 March", flow_rate: 0},  {id: 4, item_name: "Egg", quantity: 120, expiry_date: "10 March", flow_rate: 0}, {id: 5, item_name: "Potato Fries", quantity: 150, expiry_date: "10 March", flow_rate: 0}])
   const [lowStock, setLowStock] = useState([{id: 0, ItemName: "Fish Patty", Quantity: 5}]);
   const [suppliers, setSupplier] = useState([{id:0, Name: "Sheng Siong", ItemName: "Fish Patty", PhoneNumber: 81234567}])
   const [page, setPage] = useState(0);
   const [showNotification, setShowNotification] = useState(true);
 
-//     const fetchOrders = async () => {
-//       try {
-//         const response = await fetch(
-//           'http://10.0.2.2:8000/api/orderdata/',
-//         );
-//         const json = await response.json();
-//         setOrders(json);
-//         console.log(json);
-//         return json;a
-//       } catch (error) {
-//         console.error(error);
-//       }
-//     };
-//
-//     useEffect(()=>{
-//         fetchOrders();
-//     }, [])
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch(
+          'http://10.0.2.2:8000/api/inventory/',
+        );
+        const json = await response.json();
+        setOrders(json);
+        console.log(json);
+        return json;a
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
+    useEffect(()=>{
+        fetchOrders();
+    }, [])
+
+    const handleFormSubmit = async () => {
+        // Refresh orders by calling fetchOrders
+        await fetchOrders();
+    };
   return (
     <SafeAreaView style={styles.backgroundStyle}>
         {(showNotification && lowStock.length > 0) &&  (
@@ -64,7 +69,7 @@ function App(): JSX.Element {
         )}
         <Navbar/>
         {page === 0 && <ViewInventoryUI setPage={setPage} orders={orders}/>}
-        {page === 1 && <InventoryFormUI setPage={setPage}/>}
+        {page === 1 && <InventoryFormUI setPage={setPage} handleFormSubmit={handleFormSubmit}/>}
         {page === 2 && <ViewPredictionsUI setPage={setPage}  orders={orders}/>}
         {page === 3 && <ViewSuggestionsUI setPage={setPage}/>}
     </SafeAreaView>
@@ -77,89 +82,5 @@ const styles = StyleSheet.create({
         height: '100%'
     },
 });
-
-////// Code Example
-//       <StatusBar
-//         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-//         backgroundColor={backgroundStyle.backgroundColor}
-//       />
-//       <ScrollView
-//         contentInsetAdjustmentBehavior="automatic"
-//         style={backgroundStyle}>
-//         <Header />
-//         <View
-//           style={{
-//             backgroundColor: isDarkMode ? Colors.black : Colors.white,
-//           }}>
-//           <Section title="Step One">
-//             Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-//             screen and then come back to see your edits.
-//           </Section>
-//           <Section title="See Your Changes">
-//             <ReloadInstructions />
-//           </Section>
-//           <Section title="Debug">
-//             <DebugInstructions />
-//           </Section>
-//           <Section title="Learn More">
-//             Read the docs to discover what to do next:
-//           </Section>
-//           <LearnMoreLinks />
-//         </View>
-//       </ScrollView>
-/////////////////////
-
-/////// Component Example
-// type SectionProps = PropsWithChildren<{
-//   title: string;
-// }>;
-//
-// function Section({children, title}: SectionProps): JSX.Element {
-//   const isDarkMode = useColorScheme() === 'dark';
-//   return (
-//     <View style={styles.sectionContainer}>
-//       <Text
-//         style={[
-//           styles.sectionTitle,
-//           {
-//             color: isDarkMode ? Colors.white : Colors.black,
-//           },
-//         ]}>
-//         {title}
-//       </Text>
-//       <Text
-//         style={[
-//           styles.sectionDescription,
-//           {
-//             color: isDarkMode ? Colors.light : Colors.dark,
-//           },
-//         ]}>
-//         {children}
-//       </Text>
-//     </View>
-//   );
-// }
-/////////////
-
-/////// Style Example
-// const styles = StyleSheet.create({
-//   sectionContainer: {
-//     marginTop: 32,
-//     paddingHorizontal: 24,
-//   },
-//   sectionTitle: {
-//     fontSize: 24,
-//     fontWeight: '600',
-//   },
-//   sectionDescription: {
-//     marginTop: 8,
-//     fontSize: 18,
-//     fontWeight: '400',
-//   },
-//   highlight: {
-//     fontWeight: '700',
-//   },
-// });
-/////////////
 
 export default App;

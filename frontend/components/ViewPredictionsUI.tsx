@@ -36,7 +36,7 @@ const ViewPredictionsUI = (props: InventoryProps) => {
     const month = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30];
     const [histoData, setHistoData] = useState(monthData);
     const [labels, setLabels] = useState(month)
-    const [predictions, setPredictions] = useState([{id: 0, ItemName: "Burger Bun", Quantity: 45}, {id: 1, ItemName: "Fish Patty", Quantity: 40}, {id: 2, ItemName: "Cheese Slice", Quantity: 35},  {id: 3, ItemName: "Egg", Quantity: 80}, {id: 4, ItemName: "Potato Fries", Quantity: 150}]);
+    const [predictions, setPredictions] = useState([{id: 0, item_name: "Burger Bun", quantity: 45}, {id: 1, item_name: "Fish Patty", quantity: 40}, {id: 2, item_name: "Cheese Slice", quantity: 35},  {id: 3, item_name: "Egg", quantity: 80}, {id: 4, item_name: "Potato Fries", quantity: 150}]);
 
     const [timeframe, setTimeframe] = useState("1 month");
     const options = ["1 month", "2 weeks", "1 week"]
@@ -47,7 +47,7 @@ const ViewPredictionsUI = (props: InventoryProps) => {
         );
         const json = await response.json();
         setPredictions(json);
-        console.log(json);
+//         console.log(json);
         return json;
       } catch (error) {
         console.error(error);
@@ -58,11 +58,11 @@ const ViewPredictionsUI = (props: InventoryProps) => {
         fetchPredictions();
     }, [])
 
-    // Render each item in the list
+    // PREDICTIONS
     const renderItem = ({ item }) => {
       const check = 2;
       for(order of props.orders){
-        if(item.name === order.ItemName){
+        if(item.item_name === order.item_name){
             if(order.quantity < item.quantity){
                 check = 0;
             }
@@ -71,32 +71,35 @@ const ViewPredictionsUI = (props: InventoryProps) => {
             }
         }
       }
-      return(<View key={item.index} style={{...styles.listItem, marginTop: 5}}>
-        <View style={styles.inputName}><Text style={styles.normalText}>{item.ItemName}</Text></View>
-        <View style={styles.inputQty}><Text style={{textAlign: "center",fontWeight: "600",}}>{item.Quantity}</Text></View>
+      return(<View key={item.id} style={{...styles.listItem, marginTop: 5}}>
+        <View style={styles.inputName}><Text style={styles.normalText}>{item.item_name}</Text></View>
+        <View style={styles.inputQty}><Text style={{textAlign: "center",fontWeight: "600",}}>{item.quantity}</Text></View>
       </View>)
     };
+
     let uniqueNames = []
+
     // Render each item in the list
     const renderOrders = ({ item }) => {
-      if(uniqueNames.includes(item.ItemName)){
+        console.log(item)
+      if(uniqueNames.includes(item.item_name)){
         return;
       }
-      uniqueNames.push(item.ItemName);
+      uniqueNames.push(item.item_name);
       let qtys = 0;
       for(order of props.orders){
-        if(order.ItemName === item.ItemName){
-            qtys += order.Quantity;
+        if(order.item_name === item.item_name){
+            qtys += order.quantity;
         }
       }
       // Green = 2, yellow = 1, red = 0
       let check = 2;
       for(pred of predictions){
-        if(pred.ItemName === item.ItemName){
-            if(qtys < pred.Quantity){
+        if(pred.item_name === item.item_name){
+            if(qtys < pred.quantity){
                 check = 0;
             }
-            else if(qtys === pred.Quantity){
+            else if(qtys === pred.quantity){
                 check = 1;
             }
         }
@@ -106,12 +109,12 @@ const ViewPredictionsUI = (props: InventoryProps) => {
         fontWeight: "600",
         color: check === 2 ? "green" : check === 1 ? "black" : "red"
       };
-
+      console.log(item)
       return (
         <View key={item.id}>
           <View style={{ ...styles.listItem, marginTop: 5 }}>
             <View style={styles.inputName}>
-              <Text style={styles.normalText}>{item.ItemName}</Text>
+              <Text style={styles.normalText}>{item.item_name}</Text>
             </View>
             <View style={styles.inputQty}>
               <Text style={orderStyle}>{qtys}</Text>

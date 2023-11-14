@@ -29,27 +29,27 @@ const ViewInventoryUI = (props: InventoryProps) => {
                 <Text style={[styles.lightText, styles.headerText]}>Inventory</Text>
                 <ScrollView style={{...styles.listStyle, height: 400}}>
                     {props.orders.map((item)=>{
-                        if(uniqueItems.includes(item.ItemName)){
+                        if(uniqueItems.includes(item.item_name)){
                             return;
                         }
-                        uniqueItems.push(item.ItemName);
+                        uniqueItems.push(item.item_name);
                         let qtys = 0;
                         let expiryList = []
                         for(order of props.orders){
-                            if(order.ItemName === item.ItemName){
-                                qtys += order.Quantity;
-                                expiryList.push([order.Quantity, item.ExpiryDate]);
+                            if(order.item_name === item.item_name){
+                                qtys += order.quantity;
+                                expiryList.push([order.quantity, item.expiry_date]);
                             }
                         }
                         return(<View key = {item.id} style={{flex: 1}}>
                               <View style={{...styles.listItem}}>
-                                <Pressable onPress={()=>{toggleAccordion !== null ? setToggleAccordion(null) : setToggleAccordion(item.id)}} style={{...styles.inputName, flexDirection: "row", justifyContent: "space-between"}}><Text style={styles.normalText}>{item.ItemName}</Text><Text style={{paddingRight: 5, fontSize: 20, fontWeight: 900}}>&darr;</Text></Pressable>
+                                <Pressable onPress={()=>{toggleAccordion !== null ? setToggleAccordion(null) : setToggleAccordion(item.id)}} style={{...styles.inputName, flexDirection: "row", justifyContent: "space-between"}}><Text style={styles.normalText}>{item.item_name}</Text><Text style={{paddingRight: 5, fontSize: 20, fontWeight: 900}}>&darr;</Text></Pressable>
                                 <View style={styles.inputQty}><Text style={{textAlign: "center", fontWeight: "600"}}>{qtys}</Text></View>
                               </View>
                           {toggleAccordion === item.id && <View style={{...styles.inputName, height: "fit-content"}}>
                             {expiryList.map((exp,index)=>(
                                 <View key={index}>
-                                    <Text>{exp[0]}x: {exp[1]}</Text>
+                                    <Text>{exp[0]}x: Expires {exp[1].slice(8,10)}-{exp[1].slice(5,7)}-{exp[1].slice(0,4)}</Text>
                                 </View>
                             ))}
                           </View>}
