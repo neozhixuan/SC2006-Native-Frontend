@@ -60,7 +60,7 @@ const ViewPredictionsUI = (props: InventoryProps) => {
 
     // PREDICTIONS
     const renderItem = ({ item }) => {
-      const check = 2;
+      let check = 2;
       for(order of props.orders){
         if(item.item_name === order.item_name){
             if(order.quantity < item.quantity){
@@ -71,7 +71,7 @@ const ViewPredictionsUI = (props: InventoryProps) => {
             }
         }
       }
-      return(<View key={item.id} style={{...styles.listItem, marginTop: 5}}>
+      return(<View key={item.item_id} style={{...styles.listItem, marginTop: 5}}>
         <View style={styles.inputName}><Text style={styles.normalText}>{item.item_name}</Text></View>
         <View style={styles.inputQty}><Text style={{textAlign: "center",fontWeight: "600",}}>{item.quantity}</Text></View>
       </View>)
@@ -111,7 +111,7 @@ const ViewPredictionsUI = (props: InventoryProps) => {
       };
       console.log(item)
       return (
-        <View key={item.id}>
+        <View key={item.item_id}>
           <View style={{ ...styles.listItem, marginTop: 5 }}>
             <View style={styles.inputName}>
               <Text style={styles.normalText}>{item.item_name}</Text>
@@ -194,7 +194,7 @@ const ViewPredictionsUI = (props: InventoryProps) => {
                         <FlatList
                           data={props.orders}
                           renderItem={renderOrders}
-                          keyExtractor={(item) => item.id}
+                          keyExtractor={(item) => item.item_id}
                         />
                     </View>
                 </View>

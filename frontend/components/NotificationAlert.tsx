@@ -3,15 +3,14 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { styles, COLORS } from "./styles";
 interface LowStockType {
-  id: number;
-  ItemName: string;
-  Quantity: number;
+  item_name: string;
+  total_quantity: number;
 }
 interface SuppliersType {
   id: number;
-  Name: string;
-  ItemName: string;
-  PhoneNumber: number
+  item_name: string;
+  item_sold: string;
+  phone_no: number
 }
 
 type NotificationType = {
@@ -42,16 +41,18 @@ const NotificationAlert = ({ message, onClose, lowStock, suppliers }) => {
       <Text style={styles.normalText}>You have items on low stock:</Text>
       <View style={styles.listStyle}>
           {lowStock.map((item) => {
-            const stockSupplier = suppliers.find((supplier) => supplier.ItemName === item.ItemName)
-            console.log(stockSupplier)
-            return(
-            <View key = {item.id} style={{flex: 1}}>
-              <View style={{...styles.listItem}}>
-                <View style={styles.inputName}><Text style={styles.normalText}>{item.ItemName}</Text></View>
-                <View style={styles.inputQty}><Text style={{textAlign: "center", fontWeight: "600"}}>{item.Quantity}</Text></View>
-              </View>
-              <Text>Contact <Text style={{color: "brown"}}>{stockSupplier.Name}</Text> at <Text style={{color: "blue"}}>{stockSupplier.PhoneNumber}</Text> to order.</Text>
-            </View>)
+//           console.log(suppliers)
+//           console.log(item)
+            const stockSupplier = suppliers.find((supplier) => supplier.item_sold === item.item_name)
+            return( stockSupplier &&
+                (<View key = {item.item_id} style={{flex: 1}}>
+                  <View style={{...styles.listItem}}>
+                    <View style={styles.inputName}><Text style={styles.normalText}>{item.item_name}</Text></View>
+                    <View style={styles.inputQty}><Text style={{textAlign: "center", fontWeight: "600"}}>{item.total_quantity}</Text></View>
+                  </View>
+                  <Text>Contact <Text style={{color: "brown"}}>{stockSupplier.item_name}</Text> at <Text style={{color: "blue"}}>{stockSupplier.phone_no}</Text> to order.</Text>
+                </View>)
+            )
           })}
       </View>
       <TouchableOpacity onPress={onClose}>

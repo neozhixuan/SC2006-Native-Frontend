@@ -30,10 +30,57 @@ export interface ItemType {
 
 function App(): JSX.Element {
   const [orders, setOrders] = useState([{id: 0, item_name: "Burger Bun", quantity: 50, expiry_date: "10 March", flow_rate: 0}, {id: 1, item_name: "Burger Bun", quantity: 20, expiry_date: "12 March", flow_rate: 0}, {id: 2, item_name: "Fish Patty", quantity: 5, expiry_date: "10 March", flow_rate: 0}, {id: 3, item_name: "Cheese Slice", quantity: 30, expiry_date: "10 March", flow_rate: 0},  {id: 4, item_name: "Egg", quantity: 120, expiry_date: "10 March", flow_rate: 0}, {id: 5, item_name: "Potato Fries", quantity: 150, expiry_date: "10 March", flow_rate: 0}])
-  const [lowStock, setLowStock] = useState([{id: 0, ItemName: "Fish Patty", Quantity: 5}]);
-  const [suppliers, setSupplier] = useState([{id:0, Name: "Sheng Siong", ItemName: "Fish Patty", PhoneNumber: 81234567}])
+  const [lowStock, setLowStock] = useState([{item_name: "Fish Patty", total_quantity: 5}]);
+  const [suppliers, setSupplier] = useState([{id:0, item_name: "Sheng Siong", item_sold: "Fish Patty", phone_no: 81234567}])
   const [page, setPage] = useState(0);
   const [showNotification, setShowNotification] = useState(true);
+  const [data, setData] = useState(null);
+
+    const fetchSuppliers = async () => {
+        try {
+          const response = await fetch('http://10.0.2.2:8000/api/supplier/');
+          const jsonData = await response.json();
+          setSupplier(jsonData)
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+    };
+
+    const fetchLowStock = async () => {
+        try {
+          const response = await fetch('http://10.0.2.2:8000/fn/filterForLowStock');
+          const jsonData = await response.json();
+          setLowStock((stock)=>(jsonData));
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+    };
+
+    const updateLowStock  = async () => {
+        try {
+          const response = await fetch('http://10.0.2.2:8000/fn/filterForLowStock');
+          const jsonData = await response.json();
+          if(JSON.stringify(lowStock) !== JSON.stringify(jsonData)){
+            setLowStock(jsonData)
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+    }
+
+    useEffect(() => {
+        // Initial fetch
+        updateLowStock();
+//         fetchOrders();
+        // Polling every 3 seconds
+        const intervalId = setInterval(() => {
+          updateLowStock();
+         // fetchOrders();
+        }, 3000);
+
+        // Cleanup the interval on component unmount
+        return () => clearInterval(intervalId);
+    }, []); // Empty dependency array to run only once on mount
 
     const fetchOrders = async () => {
       try {
@@ -41,8 +88,10 @@ function App(): JSX.Element {
           'http://10.0.2.2:8000/api/inventory/',
         );
         const json = await response.json();
-        setOrders(json);
-        console.log(json);
+        console.log(orders)
+        if(json !== orders){
+            setOrders(json);
+        }
         return json;a
       } catch (error) {
         console.error(error);
@@ -50,7 +99,9 @@ function App(): JSX.Element {
     };
 
     useEffect(()=>{
+        fetchLowStock();
         fetchOrders();
+        fetchSuppliers();
     }, [])
 
     const handleFormSubmit = async () => {
