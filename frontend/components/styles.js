@@ -1,9 +1,9 @@
 import { StyleSheet } from 'react-native';
 
 export const COLORS = {
-light: '#FBF5E6',
-peach: '#C6847C',
-buttonColor: '#EBCABC'
+    light: '#FBF5E6',
+    peach: '#C6847C',
+    buttonColor: '#EBCABC'
 }
 
 export const styles = StyleSheet.create({

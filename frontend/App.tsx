@@ -50,7 +50,7 @@ function App(): JSX.Element {
         try {
           const response = await fetch('http://10.0.2.2:8000/fn/filterForLowStock');
           const jsonData = await response.json();
-          setLowStock((stock)=>(jsonData));
+          setLowStock(jsonData);
         } catch (error) {
           console.error('Error fetching data:', error);
         }
@@ -60,6 +60,7 @@ function App(): JSX.Element {
         try {
           const response = await fetch('http://10.0.2.2:8000/fn/filterForLowStock');
           const jsonData = await response.json();
+          console.log(JSON.stringify(lowStock) === JSON.stringify(jsonData))
           if(JSON.stringify(lowStock) !== JSON.stringify(jsonData)){
             setLowStock(jsonData)
           }
@@ -68,19 +69,19 @@ function App(): JSX.Element {
         }
     }
 
-    useEffect(() => {
-        // Initial fetch
-        updateLowStock();
-//         fetchOrders();
-        // Polling every 3 seconds
-        const intervalId = setInterval(() => {
-          updateLowStock();
-         // fetchOrders();
-        }, 3000);
-
-        // Cleanup the interval on component unmount
-        return () => clearInterval(intervalId);
-    }, []); // Empty dependency array to run only once on mount
+//     useEffect(() => {
+//         // Initial fetch
+//         updateLowStock();
+// //         fetchOrders();
+//         // Polling every 3 seconds
+//         const intervalId = setInterval(() => {
+//           updateLowStock();
+//          // fetchOrders();
+//         }, 3000);
+//
+//         // Cleanup the interval on component unmount
+//         return () => clearInterval(intervalId);
+//     }, []); // Empty dependency array to run only once on mount
 
     const fetchOrders = async () => {
       try {

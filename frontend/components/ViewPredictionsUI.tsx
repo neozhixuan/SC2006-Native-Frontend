@@ -58,71 +58,7 @@ const ViewPredictionsUI = (props: InventoryProps) => {
         fetchPredictions();
     }, [])
 
-    // PREDICTIONS
-    const renderItem = ({ item }) => {
-      let check = 2;
-      for(order of props.orders){
-        if(item.item_name === order.item_name){
-            if(order.quantity < item.quantity){
-                check = 0;
-            }
-            else if(order.quantity === item.quantity){
-                check = 1;
-            }
-        }
-      }
-      return(<View key={item.item_id} style={{...styles.listItem, marginTop: 5}}>
-        <View style={styles.inputName}><Text style={styles.normalText}>{item.item_name}</Text></View>
-        <View style={styles.inputQty}><Text style={{textAlign: "center",fontWeight: "600",}}>{item.quantity}</Text></View>
-      </View>)
-    };
-
     let uniqueNames = []
-
-    // Render each item in the list
-    const renderOrders = ({ item }) => {
-        console.log(item)
-      if(uniqueNames.includes(item.item_name)){
-        return;
-      }
-      uniqueNames.push(item.item_name);
-      let qtys = 0;
-      for(order of props.orders){
-        if(order.item_name === item.item_name){
-            qtys += order.quantity;
-        }
-      }
-      // Green = 2, yellow = 1, red = 0
-      let check = 2;
-      for(pred of predictions){
-        if(pred.item_name === item.item_name){
-            if(qtys < pred.quantity){
-                check = 0;
-            }
-            else if(qtys === pred.quantity){
-                check = 1;
-            }
-        }
-      }
-      const orderStyle = {
-        textAlign: "center",
-        fontWeight: "600",
-        color: check === 2 ? "green" : check === 1 ? "black" : "red"
-      };
-      console.log(item)
-      return (
-        <View key={item.item_id}>
-          <View style={{ ...styles.listItem, marginTop: 5 }}>
-            <View style={styles.inputName}>
-              <Text style={styles.normalText}>{item.item_name}</Text>
-            </View>
-            <View style={styles.inputQty}>
-              <Text style={orderStyle}>{qtys}</Text>
-            </View>
-          </View>
-        </View>
-      );
-    };
 
     const setHistogramView = (itemValue) => {
         setTimeframe(itemValue);
@@ -182,21 +118,71 @@ const ViewPredictionsUI = (props: InventoryProps) => {
                <Text style={[styles.lightText, styles.headerText]}>Usage Predictions</Text>
               <View style={{marginBottom: 10}}>
                   <View style={styles.listStyle}>
-                      <FlatList
-                        data={predictions}
-                        renderItem={renderItem}
-                        keyExtractor={(item) => item.id}
-                      />
+                      {predictions.map((item)=>{
+                      // eslint-disable-next-line react/jsx-key
+                         let check = 2;
+                         for(order of props.orders){
+                           if(item.item_name === order.item_name){
+                               if(order.quantity < item.quantity){
+                                   check = 0;
+                               }
+                               else if(order.quantity === item.quantity){
+                                   check = 1;
+                               }
+                           }
+                         }
+                         return(<View key={item["item_id"]} style={{...styles.listItem, marginTop: 5}}>
+                           <View style={styles.inputName}><Text style={styles.normalText}>{item.item_name}</Text></View>
+                           <View style={styles.inputQty}><Text style={{textAlign: "center",fontWeight: "600",}}>{item.quantity}</Text></View>
+                         </View>)
+                       })}
                   </View>
                  <Text style={[styles.lightText, styles.headerText]}>vs. Actual Inventory</Text>
                 <View style={{marginBottom: 10}}>
-                    <View style={styles.listStyle}>
-                        <FlatList
-                          data={props.orders}
-                          renderItem={renderOrders}
-                          keyExtractor={(item) => item.item_id}
-                        />
-                    </View>
+                        {props.orders.map((item)=>{
+                            // eslint-disable-next-line react/jsx-key
+                            console.log(item)
+                            if(uniqueNames.includes(item.item_name)){
+                              return;
+                            }
+                            uniqueNames.push(item.item_name);
+                            let qtys = 0;
+                            for(order of props.orders){
+                              if(order.item_name === item.item_name){
+                                  qtys += order.quantity;
+                              }
+                            }
+                            // Green = 2, yellow = 1, red = 0
+                            let check = 2;
+                            for(pred of predictions){
+                              if(pred.item_name === item.item_name){
+                                  if(qtys < pred.quantity){
+                                      check = 0;
+                                  }
+                                  else if(qtys === pred.quantity){
+                                      check = 1;
+                                  }
+                              }
+                            }
+                            const orderStyle = {
+                              textAlign: "center",
+                              fontWeight: "600",
+                              color: check === 2 ? "green" : check === 1 ? "black" : "red"
+                            };
+
+                            return (
+                              <View key={item["item_id"]}>
+                                <View style={{ ...styles.listItem, marginTop: 5 }}>
+                                  <View style={styles.inputName}>
+                                    <Text style={styles.normalText}>{item.item_name}</Text>
+                                  </View>
+                                  <View style={styles.inputQty}>
+                                    <Text style={orderStyle}>{qtys}</Text>
+                                  </View>
+                                </View>
+                              </View>
+                            );
+                          })}
                 </View>
                  <Pressable style={[styles.mainButton, styles.marginSmaller]} onPress={() => props.setPage(0)}>
                       <Text style={[styles.buttonText, styles.normalText]}>Return</Text>

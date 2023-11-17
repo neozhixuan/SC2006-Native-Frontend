@@ -112,6 +112,13 @@ const ViewSuggestionsUI = (props: InventoryProps) => {
         setOpenTab(id);
     }
 
+    const validatePositiveNumber = (value) => {
+        if (parseFloat(value) < 1) {
+          return 'Please enter a price above 0';
+        }
+        return true;
+    };
+
     return(
             <ScrollView style={styles.mainBody}>
                <View style={styles.container}>
@@ -165,7 +172,7 @@ const ViewSuggestionsUI = (props: InventoryProps) => {
                                  </View>
                               )}
                                 name={"Price"}
-                                rules={{ required: `Price is required` }}
+                                rules={{ required: `Price is required`, validate: validatePositiveNumber, }}
                               />
 
                               {/* Description */}

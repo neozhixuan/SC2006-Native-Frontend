@@ -41,13 +41,16 @@ const ViewInventoryUI = (props: InventoryProps) => {
                                 expiryList.push([order.quantity, item.expiry_date]);
                             }
                         }
-                        return(<View key = {item.item_id} style={{flex: 1}}>
+                        // eslint-disable-next-line react/jsx-key
+                        return(<View key = {item.id} style={{flex: 1}}>
+
                               <View style={{...styles.listItem}}>
                                 <Pressable onPress={()=>{toggleAccordion !== null ? setToggleAccordion(null) : setToggleAccordion(item.item_id)}} style={{...styles.inputName, flexDirection: "row", justifyContent: "space-between"}}><Text style={styles.normalText}>{item.item_name}</Text><Text style={{paddingRight: 5, fontSize: 20, fontWeight: 900}}>&darr;</Text></Pressable>
                                 <View style={styles.inputQty}><Text style={{textAlign: "center", fontWeight: "600"}}>{qtys}</Text></View>
                               </View>
                           {toggleAccordion === item.item_id && <View style={{...styles.inputName, height: "fit-content"}}>
                             {expiryList.map((exp,idx)=>(
+                                // eslint-disable-next-line react/jsx-key
                                 <View key={idx}>
                                     <Text>{exp[0]}x: Expires {exp[1].slice(8,10)}-{exp[1].slice(5,7)}-{exp[1].slice(0,4)}</Text>
                                 </View>

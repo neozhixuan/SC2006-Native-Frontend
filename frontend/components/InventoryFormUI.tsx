@@ -103,12 +103,22 @@ const InventoryFormUI = (props: InventoryProps) => {
         fetchItemNames();
     }, [])
 
+    const validatePassword = (value) => {
+        if (value !== '1234567890') {
+          return 'Password is incorrect.';
+        }
+        return true;
+    };
+
     // Submit Form Logic
     const onSubmitForm = async (formData) => {
         try {
             for (const item of items) {
                 if (item.name === "" || item.qty === null) {
                     setError("Fill in all rows");
+                    return;
+                }else if (item.qty < 0){
+                    setError("Enter a positive number");
                     return;
                 }
 
@@ -204,6 +214,7 @@ const InventoryFormUI = (props: InventoryProps) => {
                                     placeholderTextColor="#11182744"
                                     value= {date}
                                     onChange= {onChangePicker}
+                                    minimumDate={new Date()}
                                 />
                             )}
                             {!showPicker && (
@@ -250,7 +261,7 @@ const InventoryFormUI = (props: InventoryProps) => {
                         </View>
                     )}
                     name={"Password"}
-                    rules={{ required: `Password is required` }}
+                    rules={{ required: `Password is required`, validate: validatePassword, }}
                 />
                 {/* Rows of buttons */}
                 <View style={styles.marginLarger}>
