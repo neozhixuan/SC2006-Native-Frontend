@@ -1,5 +1,7 @@
 # SC2006-Native-Frontend
 
+![image](https://github.com/neozhixuan/SC2006-Native-Frontend/assets/79783660/b56157f9-1829-4eeb-b3df-640fb933390e)
+
 ## System Specifications
 - 21 > JRE Version >= 17
 - Android API 34, Extension Level 3 Platform
