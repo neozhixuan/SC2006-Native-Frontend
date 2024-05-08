@@ -29,3 +29,29 @@ Install all necessary SDKs from https://reactnative.dev/docs/environment-setup
 3. `npm i`
 4. `npx react-native start`
 5. Press `a` to run android simulator (wait 15s)
+
+## To debug:
+https://stackoverflow.com/questions/42064283/could-not-connect-to-react-native-development-server-on-android/56744301#56744301
+
+1. Add your IP address to <app-src>/android/app/src/.../react_native_config.xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <domain-config cleartextTrafficPermitted="true">
+    <domain includeSubdomains="false">localhost</domain>
+    <domain includeSubdomains="false">10.0.2.2</domain>
+    <domain includeSubdomains="false">10.0.3.2</domain>
+    <domain includeSubdomains="false">...</domain>
+  </domain-config>
+</network-security-config>
+
+Then run a few commands:
+cd <app-src>/android
+./gradlew clean
+cd <app-src>
+react-native run-android
+
+2. Cmd + M >> Settings >> Debug server host & port for device >> add your IP address and 8081 (?)
+
+3. react-native run-android --port=8088
+
+4. adb reverse tcp:8081 tcp:8081
