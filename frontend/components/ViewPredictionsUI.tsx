@@ -37,7 +37,7 @@ const ViewPredictionsUI = (props: InventoryProps) => {
     const [histoData, setHistoData] = useState(monthData);
     const [labels, setLabels] = useState(month)
     const [predictions, setPredictions] = useState([{id: 0, item_name: "Burger Bun", quantity: 45}, {id: 1, item_name: "Fish Patty", quantity: 40}, {id: 2, item_name: "Cheese Slice", quantity: 35},  {id: 3, item_name: "Egg", quantity: 80}, {id: 4, item_name: "Potato Fries", quantity: 150}]);
-
+    const [predictions2, setPredictions2] = useState([])
     const [timeframe, setTimeframe] = useState("1 month");
     const options = ["1 month", "2 weeks", "1 week"]
     const fetchPredictions = async () => {
@@ -53,9 +53,22 @@ const ViewPredictionsUI = (props: InventoryProps) => {
         console.error(error);
       }
     };
-
+    const fetchPredictions2 = async () => {
+      try {
+        const response = await fetch(
+          'http://10.0.2.2:8000/api/graph-points/',
+        );
+        const json = await response.json();
+        setPredictions2(json);
+//         console.log(json);
+        return json;
+      } catch (error) {
+        console.error(error);
+      }
+    };
     useEffect(()=>{
         fetchPredictions();
+        fetchPredictions2();
     }, [])
 
     let uniqueNames = []
@@ -81,10 +94,7 @@ const ViewPredictionsUI = (props: InventoryProps) => {
 
     const chartConfig = {
       backgroundGradientFrom: COLORS.peach,
-//       backgroundGradientFromOpacity: 0,
       backgroundGradientTo: COLORS.peach,
-//       backgroundGradientToOpacity: 0.5,
-//       color: COLORS.light,
       color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
       strokeWidth: 2, // optional, default 3
       barPercentage: 0.5,
@@ -117,6 +127,9 @@ const ViewPredictionsUI = (props: InventoryProps) => {
                  </View>
                <Text style={[styles.lightText, styles.headerText]}>Usage Predictions</Text>
               <View style={{marginBottom: 10}}>
+                  <View>
+                    {predictions2.map((item)=>(<View><Text>{item.x}</Text><Text>{item.y}</Text></View>))}
+                  </View>
                   <View style={styles.listStyle}>
                       {predictions.map((item)=>{
                       // eslint-disable-next-line react/jsx-key
