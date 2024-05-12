@@ -79,7 +79,8 @@ const transformDataForChart = (data, startDate) => {
   const start = moment("2023-05-01");
   const end = moment("2023-06-30");
   const fullDateRange = generateDateRange(start, end).map(date => date.format('YYYY-MM-DD'));  // Ensure the dates are in string format for easier comparison
-
+  console.log("Full date")
+  console.log(fullDateRange)
   const datasets = {
     "Training Data": {
       label: "Training Data",
@@ -122,16 +123,23 @@ const transformSingleLineData = (data, selectedWeek) => {
 
     const dataPoints = new Array(fullDateRange.length).fill(0);
 
+    var indexReplace = 0
     data.forEach(point => {
         const pointDateFormatted = moment(point.x).format('YYYY-MM-DD');
-        const index = fullDateRange.indexOf(pointDateFormatted);
+        var index = fullDateRange.indexOf(pointDateFormatted);
+        if (index === -1) {
+            index = fullDateRange.findIndex(date => moment(date).isSame(pointDateFormatted, 'day'));
+        }
+        console.log(`Processing single line point: Date: ${pointDateFormatted}, x: ${point.x} y: ${point.y}, Index: ${index}`);
 
-        console.log(`Processing single line point: Date: ${pointDateFormatted}, y: ${point.y}, Index: ${index}`);
-
-        if (index !== -1) {
+        if (index !== -1){
             dataPoints[index] = point.y;
+        }else{
+            dataPoints[indexReplace] = point.y
+            indexReplace += 1;
         }
     });
+
 
     console.log("Transformed Data Points for Single Line Chart:", dataPoints);
 
