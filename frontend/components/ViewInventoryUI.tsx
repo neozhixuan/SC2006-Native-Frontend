@@ -28,7 +28,7 @@ const ViewInventoryUI = (props: InventoryProps) => {
             <View style={{...styles.container, height: "80%"}}>
                 <Text style={[styles.lightText, styles.headerText]}>Inventory</Text>
                 <ScrollView style={{...styles.listStyle, height: 400}}>
-                    {props.orders.map((item)=>{
+                    {props.orders.map((item, idx)=>{
                         if(uniqueItems.includes(item.item_name)){
                             return;
                         }
@@ -42,7 +42,7 @@ const ViewInventoryUI = (props: InventoryProps) => {
                             }
                         }
                         // eslint-disable-next-line react/jsx-key
-                        return(<View key = {item.id} style={{flex: 1}}>
+                        return(<View key = {idx} style={{flex: 1}}>
 
                               <View style={{...styles.listItem}}>
                                 <Pressable onPress={()=>{toggleAccordion !== null ? setToggleAccordion(null) : setToggleAccordion(item.item_id)}} style={{...styles.inputName, flexDirection: "row", justifyContent: "space-between"}}><Text style={styles.normalText}>{item.item_name}</Text><Text style={{paddingRight: 5, fontSize: 20, fontWeight: 900}}>&darr;</Text></Pressable>

@@ -1,0 +1,124 @@
+        <Text style={[styles.lightText, styles.headerText]}>Usage Predictions</Text>
+
+<View style={{ marginBottom: 10 }}>
+          <View style={styles.listStyle}>
+            {predictions.map((item, idx) => {
+              let check = 2;
+              for (const order of props.orders) {
+                if (item.item_name === order.item_name) {
+                  if (order.quantity < item.quantity) {
+                    check = 0;
+                  } else if (order.quantity === item.quantity) {
+                    check = 1;
+                  }
+                }
+              }
+              return (
+                <View key={idx} style={{ ...styles.listItem, marginTop: 5 }}>
+                  <View style={styles.inputName}><Text style={styles.normalText}>{item.item_name}</Text></View>
+                  <View style={styles.inputQty}><Text style={{ textAlign: "center", fontWeight: "600" }}>{item.quantity}</Text></View>
+                </View>
+              );
+            })}
+          </View>
+          <Text style={[styles.lightText, styles.headerText]}>vs. Actual Inventory</Text>
+          <View style={{ marginBottom: 10 }}>
+            {props.orders.map((item, idx) => {
+              if (uniqueNames.includes(item.item_name)) return null;
+              uniqueNames.push(item.item_name);
+              let qtys = 0;
+              for (const order of props.orders) {
+                if (order.item_name === item.item_name) {
+                  qtys += order.quantity;
+                }
+              }
+              let check = 2;
+              for (const pred of predictions) {
+                if (pred.item_name === item.item_name) {
+                  if (qtys < pred.quantity) {
+                    check = 0;
+                  } else if (qtys === pred.quantity) {
+                    check = 1;
+                  }
+                }
+              }
+              const orderStyle = {
+                textAlign: "center",
+                fontWeight: "600",
+                color: check === 2 ? "green" : check === 1 ? "black" : "red"
+              };
+
+              return (
+                <View key={idx}>
+                  <View style={{ ...styles.listItem, marginTop: 5 }}>
+                    <View style={styles.inputName}>
+                      <Text style={styles.normalText}>{item.item_name}</Text>
+                    </View>
+                    <View style={styles.inputQty}>
+                      <Text style={orderStyle}>{qtys}</Text>
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+          <Pressable style={[styles.mainButton, styles.marginSmaller]} onPress={() => props.setPage(0)}>
+            <Text style={[styles.buttonText, styles.normalText]}>Return</Text>
+          </Pressable>
+        </View>
+
+
+----------------------------
+
+  // Adjusted function to handle real-time week selection
+     const transformDataForChart = (data, startDate) => {
+       let filteredData = data;
+       if (startDate !== null) {
+         filteredData = data.filter(point => {
+           const date = moment(point.x);
+           return date.isSameOrAfter(startDate) && date.isBefore(startDate.clone().add(7, 'days'));
+         });
+       }
+
+       // Ensure data is sorted in ascending order based on the date (optional, uncomment if needed)
+       // filteredData.sort((a, b) => moment(a.x).diff(moment(b.x)));
+
+       // Now, if you want to reverse the order for specific timeframes:
+//        if (startDate !== null) {
+//          filteredData.reverse(); // Reverse the order only when a specific timeframe is selected
+//        }
+
+//        console.log(filteredData)
+
+
+
+      // Prepare datasets with labels and data sorted by date
+      const datasets = {};
+      filteredData.forEach(point => {
+
+        if (!datasets[point.label]) {
+          datasets[point.label] = {
+            label: point.label,
+            data: [],
+            color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // customize color here based on label if needed
+          };
+          const colorMap = {
+              'Training Data': 'rgba(134, 65, 244, 1)', // Example color
+              'Actual Sales': 'rgba(244, 65, 134, 1)',
+              'Predicted Sales': 'rgba(65, 134, 244, 1)'
+            };
+
+            // Then in the loop where datasets are populated:
+            datasets[point.label].color = (opacity = 1) => colorMap[point.label];
+        }
+        datasets[point.label].data.push(point.y);
+      });
+
+      const labels = filteredData.map(point => point.x); // Labels are the sorted dates
+
+      // Convert datasets object to array format expected by the chart
+      const datasetsArray = Object.values(datasets);
+            console.log(datasetsArray)
+
+      return { labels, datasets: datasetsArray };
+    };

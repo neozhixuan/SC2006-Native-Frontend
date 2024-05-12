@@ -40,12 +40,12 @@ const NotificationAlert = ({ message, onClose, lowStock, suppliers }) => {
     <Animated.View style={[notifStyles.notificationContainer, { transform: [{ translateY }] }]}>
       <Text style={styles.normalText}>You have items on low stock:</Text>
       <View style={styles.listStyle}>
-          {lowStock.map((item) => {
+          {lowStock.map((item, idx) => {
 //           console.log(suppliers)
 //           console.log(item)
             const stockSupplier = suppliers.find((supplier) => supplier.item_sold === item.item_name)
             return( stockSupplier &&
-                (<View key = {item.item_id} style={{flex: 1}}>
+                (<View key = {idx} style={{flex: 1}}>
                   <View style={{...styles.listItem}}>
                     <View style={styles.inputName}><Text style={styles.normalText}>{item.item_name}</Text></View>
                     <View style={styles.inputQty}><Text style={{textAlign: "center", fontWeight: "600"}}>{item.total_quantity}</Text></View>
