@@ -2,25 +2,15 @@ import {
   StyleSheet,
   Text,
   View,
-  FlatList,
   Pressable,
-  Alert,
-  TextInput,
   ScrollView
 } from 'react-native';
 import { styles, COLORS } from "./styles";
 import { Picker } from '@react-native-picker/picker';
-
-// Chart Library //
 import { Dimensions } from "react-native";
-const screenWidth = Dimensions.get("window").width - 60;
-import {
-  LineChart
-} from "react-native-chart-kit";
-///////////////////
-
+import { LineChart } from "react-native-chart-kit";
 import { useState, useEffect } from 'react';
-import moment from 'moment'; // Adding moment.js to handle date manipulation
+import moment from 'moment';
 import { ItemType } from "../App.tsx";
 
 type InventoryProps = {
@@ -29,168 +19,20 @@ type InventoryProps = {
 };
 
 const ViewPredictionsUI = (props: InventoryProps) => {
-  const [predictions, setPredictions] = useState([
-    { id: 0, item_name: "Burger Bun", quantity: 45 },
-    { id: 1, item_name: "Fish Patty", quantity: 40 },
-    { id: 2, item_name: "Cheese Slice", quantity: 35 },
-    { id: 3, item_name: "Egg", quantity: 80 },
-    { id: 4, item_name: "Potato Fries", quantity: 150 }
-  ]);
+  const [predictions, setPredictions] = useState([]);
+  const [graphData, setGraphData] = useState({ labels: [], datasets: [{ data: [] }] });
+  const [lettuceGraphData, setLettuceGraphData] = useState({ labels: [], datasets: [{ data: [] }] });
+  const [tomatoGraphData, setTomatoGraphData] = useState({ labels: [], datasets: [{ data: [] }] });
+  const [cucumberGraphData, setCucumberGraphData] = useState({ labels: [], datasets: [{ data: [] }] });
+  const [pepperGraphData, setPepperGraphData] = useState({ labels: [], datasets: [{ data: [] }] });
 
-  const [graphData, setGraphData] = useState({
-    labels: [],
-    datasets: [{ data: [] }]
-  });
+  const [weeksOptions, setWeeksOptions] = useState([]);
+  const [selectedWeek, setSelectedWeek] = useState("All Data");
 
-  const [timeframe, setTimeframe] = useState("1 week");
-  const [weeksOptions, setWeeksOptions] = useState([]); // All available weeks for selection
-  const [selectedWeek, setSelectedWeek] = useState(""); // Currently selected week
+  const ALLOWED_LABELS = ["Training Data", "Actual Sales", "Predicted Sales"];
+  const produceLabels = ["Lettuce Romaine", "Tomatoes Cherry", "Cucumber Local", "Pepper / Capsicum Green"];
 
-  const fetchPredictions = async () => {
-    try {
-      const response = await fetch('http://10.0.2.2:8000/api/predictions');
-      const json = await response.json();
-      setPredictions(json);
-      return json;
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-    const organizeDataByLabel = (data) => {
-      const colorMap = {
-        'Training Data': 'rgba(134, 65, 244, 1)',
-        'Actual Sales': 'rgba(244, 65, 134, 1)',
-        'Predicted Sales': 'rgba(65, 134, 244, 1)',
-        // Add more label-to-color mappings here if needed
-      };
-
-      const datasets = {};
-      data.forEach(point => {
-        if (!datasets[point.label]) {
-          datasets[point.label] = {
-            label: point.label,
-            data: [],
-            color: (opacity = 1) => `${colorMap[point.label]}`,
-          };
-        }
-        datasets[point.label].data.push(point.y);
-      });
-
-      return datasets;
-    };
-
-const transformDataForChart = (data) => {
-  // Universal start date and end date for all datasets
-  const startDate = moment("2023-01-01");
-  const endDate = moment("2023-06-30");
-
-  // Function to generate a full date range from start to end date
-  const generateDateRange = (startDate, endDate) => {
-    const dateRange = [];
-    let currentDate = startDate.clone();
-    while (currentDate <= endDate) {
-      dateRange.push(currentDate.format('YYYY-MM-DD'));
-      currentDate.add(1, 'day');
-    }
-    return dateRange;
-  };
-
-  const fullDateRange = generateDateRange(startDate, endDate);
-
-  // Initialization of datasets with null values to ensure all are the same length
-  const datasets = {
-    "Training Data": {
-      label: "Training Data",
-      data: new Array(fullDateRange.length).fill(null),
-      color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`
-    },
-    "Actual Sales": {
-      label: "Actual Sales",
-      data: new Array(fullDateRange.length).fill(null),
-      color: (opacity = 1) => `rgba(244, 65, 134, ${opacity})`
-    },
-    "Predicted Sales": {
-      label: "Predicted Sales",
-      data: new Array(fullDateRange.length).fill(null),
-      color: (opacity = 1) => `rgba(65, 134, 244, ${opacity})`
-    }
-  };
-
-  // Fill in actual data points for each dataset starting from their respective start points
-  data.forEach(point => {
-    const dataset = datasets[point.label];
-    if (dataset) {
-      const index = fullDateRange.indexOf(moment(point.x).format('YYYY-MM-DD'));
-      if (index !== -1) {
-        dataset.data[index] = point.y; // Assign y-values starting from the respective start dates
-      }
-    }
-  });
-
-  return {
-    labels: fullDateRange,
-    datasets: Object.values(datasets)
-  };
-};
-
-
-
-  const fetchGraphData = async () => {
-    try {
-      const response = await fetch('http://10.0.2.2:8000/api/graph-points/');
-      const json = await response.json();
-      // Initialize the weeks selection based on the data
-      initializeWeeksOptions(json);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-const initializeWeeksOptions = (data) => {
-  const firstDate = moment.min(data.map(point => moment(point.x)));
-  const lastDate = moment.max(data.map(point => moment(point.x)));
-
-  const weeks = ["All Data"]; // Add "All Data" option here
-  let current = firstDate.clone().day(0);
-  while (current.isBefore(lastDate)) {
-    weeks.push(current.format('YYYY-MM-DD'));
-    current = current.clone().add(7, 'days');
-  }
-
-  setWeeksOptions(weeks);
-  setSelectedWeek("All Data"); // Set initial state to "All Data"
-
-  // Load all data initially
-  setGraphData(transformDataForChart(data, null));
-};
-
-const adjustTimeframe = (selectedWeek) => {
-  setSelectedWeek(selectedWeek);
-
-  fetch('http://10.0.2.2:8000/api/graph-points/')
-    .then(response => response.json())
-    .then(data => {
-      if (selectedWeek === "All Data") {
-        // If "All Data" is selected, return all data without filtering
-        setGraphData(transformDataForChart(data, null));
-      } else {
-        // Filter based on the selected start date
-        const startDate = moment(selectedWeek);
-        setGraphData(transformDataForChart(data, startDate));
-      }
-    })
-    .catch(console.error);
-};
-
-
-  useEffect(() => {
-    fetchPredictions();
-    fetchGraphData();
-  }, []);
-
-  let uniqueNames = [];
-
+  // Chart configurations
   const chartConfig = {
     backgroundGradientFrom: COLORS.peach,
     backgroundGradientTo: COLORS.peach,
@@ -199,6 +41,203 @@ const adjustTimeframe = (selectedWeek) => {
     barPercentage: 0.5,
     useShadowColorFromDataset: false
   };
+
+  const singleLineChartConfig = {
+    backgroundGradientFrom: COLORS.peach,
+    backgroundGradientTo: COLORS.peach,
+    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+    strokeWidth: 2,
+    barPercentage: 0.5,
+    useShadowColorFromDataset: false
+  };
+
+  const screenWidth = Dimensions.get("window").width - 60;
+
+  const fetchPredictions = async () => {
+    try {
+      const response = await fetch('http://10.0.2.2:8000/api/predictions');
+      const json = await response.json();
+      setPredictions(json);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Function to generate a date range between two moments (start and end)
+const generateDateRange = (start, end) => {
+    const dateRange = [];
+    let currentDate = start.clone();
+    while (currentDate.isSameOrBefore(end)) {
+        dateRange.push(currentDate.clone());
+        currentDate.add(1, 'day');
+    }
+    return dateRange;
+};
+
+// Modify the transformDataForChart function to ensure data aligns with 1st May to 30th June
+const transformDataForChart = (data, startDate) => {
+  const start = moment("2023-05-01");
+  const end = moment("2023-06-30");
+  const fullDateRange = generateDateRange(start, end).map(date => date.format('YYYY-MM-DD'));  // Ensure the dates are in string format for easier comparison
+
+  const datasets = {
+    "Training Data": {
+      label: "Training Data",
+      data: new Array(fullDateRange.length).fill(0),
+      color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`
+    },
+    "Actual Sales": {
+      label: "Actual Sales",
+      data: new Array(fullDateRange.length).fill(0),
+      color: (opacity = 1) => `rgba(244, 65, 134, ${opacity})`
+    },
+    "Predicted Sales": {
+      label: "Predicted Sales",
+      data: new Array(fullDateRange.length).fill(0),
+      color: (opacity = 1) => `rgba(65, 134, 244, ${opacity})`
+    }
+  };
+
+  console.log("Data Points Received:", data.length);
+
+  data.forEach(point => {
+    const pointDateFormatted = moment(point.x).format('YYYY-MM-DD');
+    const index = fullDateRange.indexOf(pointDateFormatted);
+    console.log(`Processing point: Date: ${pointDateFormatted}, Label: ${point.label}, y: ${point.y}, Index: ${index}`);
+    if (index !== -1 && datasets[point.label]) {
+      datasets[point.label].data[index] = point.y || 0;  // Ensuring data is set only if the label matches
+    }
+  });
+
+  return { labels: fullDateRange, datasets: Object.values(datasets) };
+};
+
+const transformSingleLineData = (data, selectedWeek) => {
+    const start = selectedWeek ? moment(selectedWeek) : moment("2023-05-01");
+    const end = selectedWeek ? start.clone().add(6, 'days') : moment("2023-06-30");
+    const fullDateRange = generateDateRange(start, end).map(date => date.format('YYYY-MM-DD'));
+
+    console.log("Data Points to be processed:", data);
+    console.log("Full Date Range for Single Line Chart:", fullDateRange);
+
+    const dataPoints = new Array(fullDateRange.length).fill(0);
+
+    data.forEach(point => {
+        const pointDateFormatted = moment(point.x).format('YYYY-MM-DD');
+        const index = fullDateRange.indexOf(pointDateFormatted);
+
+        console.log(`Processing single line point: Date: ${pointDateFormatted}, y: ${point.y}, Index: ${index}`);
+
+        if (index !== -1) {
+            dataPoints[index] = point.y;
+        }
+    });
+
+    console.log("Transformed Data Points for Single Line Chart:", dataPoints);
+
+    return {
+        labels: fullDateRange,
+        datasets: [{
+            data: dataPoints,
+            color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
+            strokeWidth: 2
+        }]
+    };
+};
+
+
+
+
+
+const initializeWeeksOptionsForAllSets = (data) => {
+  // Creates week options from May 1st to June 30th
+  const createFixedWeeksOptions = () => {
+    const start = moment("2023-05-01");
+    const end = moment("2023-06-30");
+    const weeks = ["All Data"];
+    let current = start.clone().day(0);  // Ensure it starts from the start of a week
+
+    while (current.isBefore(end)) {
+      weeks.push(current.format('YYYY-MM-DD'));
+      current.add(7, 'days');
+    }
+    return weeks;
+  };
+
+  const lettuceData = data.filter(point => point.label === "Lettuce Romaine");
+  const tomatoData = data.filter(point => point.label === "Tomatoes Cherry");
+  const cucumberData = data.filter(point => point.label === "Cucumber Local");
+  const pepperData = data.filter(point => point.label === "Pepper / Capsicum Green");
+
+  const combinedWeeks = createFixedWeeksOptions();  // Use fixed week options
+  setWeeksOptions(combinedWeeks);
+  setSelectedWeek("All Data");
+
+  setGraphData(transformDataForChart(data.filter(point => ALLOWED_LABELS.includes(point.label)), null));
+  setLettuceGraphData(transformSingleLineData(lettuceData, null));
+  setTomatoGraphData(transformSingleLineData(tomatoData, null));
+  setCucumberGraphData(transformSingleLineData(cucumberData, null));
+  setPepperGraphData(transformSingleLineData(pepperData, null));
+};
+
+const adjustTimeframe = (selectedWeek) => {
+  setSelectedWeek(selectedWeek);
+
+  fetch('http://10.0.2.2:8000/api/graph-points/')
+    .then(response => response.json())
+    .then(data => {
+        console.log("Full dataset from API:", data);
+      const filteredData = data.filter(point => ALLOWED_LABELS.includes(point.label));
+        const timeframeFilter = (dataset, week) => {
+          if (week === "All Data") {
+            return dataset;
+          } else {
+            const weekStart = moment(week).startOf('isoWeek');
+            const weekEnd = weekStart.clone().endOf('isoWeek');
+            return dataset.filter(point => {
+              const pointDate = moment(point.x);
+              return pointDate.isSameOrAfter(weekStart) && pointDate.isSameOrBefore(weekEnd);
+            });
+          }
+        };
+
+      setGraphData(transformDataForChart(timeframeFilter(filteredData, selectedWeek)));
+
+      // Call transform and set state functions directly
+      const lettuceData = timeframeFilter(data.filter(point => point.label === "Lettuce Romaine"), selectedWeek);
+      setLettuceGraphData(transformSingleLineData(lettuceData, selectedWeek));
+
+      const tomatoData = timeframeFilter(data.filter(point => point.label === "Tomatoes Cherry"), selectedWeek);
+      setTomatoGraphData(transformSingleLineData(tomatoData, selectedWeek));
+
+      const cucumberData = timeframeFilter(data.filter(point => point.label === "Cucumber Local"), selectedWeek);
+      setCucumberGraphData(transformSingleLineData(cucumberData, selectedWeek));
+
+      const pepperData = timeframeFilter(data.filter(point => point.label === "Pepper / Capsicum Green"), selectedWeek);
+      setPepperGraphData(transformSingleLineData(pepperData, selectedWeek));
+    })
+    .catch(console.error);
+};
+
+
+
+
+
+  const fetchGraphData = async () => {
+    try {
+      const response = await fetch('http://10.0.2.2:8000/api/graph-points/');
+      const json = await response.json();
+      initializeWeeksOptionsForAllSets(json);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPredictions();
+    fetchGraphData();
+    console.log(lettuceGraphData)
+  }, []);
 
   return (
     <ScrollView style={styles.mainBody}>
@@ -217,24 +256,50 @@ const adjustTimeframe = (selectedWeek) => {
           </Picker>
         </View>
         <View>
-          {(graphData.labels).length > 0 && <LineChart
-                                              data={graphData}
-                                              width={screenWidth}
-                                              height={220}
-                                              chartConfig={chartConfig}
-                                              withHorizontalLabels={true}
-                                              withVerticalLabels={true}
-                                              yAxisInterval={1} // Optional: Adjust based on data density
-                                              fromZero={false} // Optional: Start Y-axis from zero or data's min value
-                                              onDataPointClick={(data) => console.log(data)} // For debugging: log data point on click
-                                              bezier // Optional: Smooth lines
-                                            />
-}
+          {graphData.labels.length > 0 && <LineChart
+            data={graphData}
+            width={screenWidth}
+            height={220}
+            chartConfig={chartConfig}
+            bezier
+          />}
+          <Text style={[styles.lightText, styles.marginSmaller]}>Lettuce Romaine</Text>
+          {lettuceGraphData.labels.length > 0 && <LineChart
+            data={lettuceGraphData}
+            width={screenWidth}
+            height={220}
+            chartConfig={singleLineChartConfig}
+            bezier
+          />}
+          <Text style={[styles.lightText, styles.marginSmaller]}>Tomatoes Cherry</Text>
+          {tomatoGraphData.labels.length > 0 && <LineChart
+            data={tomatoGraphData}
+            width={screenWidth}
+            height={220}
+            chartConfig={singleLineChartConfig}
+            bezier
+          />}
+          <Text style={[styles.lightText, styles.marginSmaller]}>Cucumber Local</Text>
+          {cucumberGraphData.labels.length > 0 && <LineChart
+            data={cucumberGraphData}
+            width={screenWidth}
+            height={220}
+            chartConfig={singleLineChartConfig}
+            bezier
+          />}
+          <Text style={[styles.lightText, styles.marginSmaller]}>Pepper / Capsicum Green</Text>
+          {pepperGraphData.labels.length > 0 && <LineChart
+            data={pepperGraphData}
+            width={screenWidth}
+            height={220}
+            chartConfig={singleLineChartConfig}
+            bezier
+          />}
         </View>
-        </View>
-                  <Pressable style={[styles.mainButton, styles.marginSmaller]} onPress={() => props.setPage(0)}>
-                    <Text style={[styles.buttonText, styles.normalText]}>Return</Text>
-                  </Pressable>
+        <Pressable style={[styles.mainButton, styles.marginSmaller]} onPress={() => props.setPage(0)}>
+          <Text style={[styles.buttonText, styles.normalText]}>Return</Text>
+        </Pressable>
+      </View>
     </ScrollView>
   );
 };
